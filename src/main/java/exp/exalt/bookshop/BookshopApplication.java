@@ -1,4 +1,4 @@
-package exp.exalt.Bookshop;
+package exp.exalt.bookshop;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
