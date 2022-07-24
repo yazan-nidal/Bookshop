@@ -1,19 +1,36 @@
 package exp.exalt.bookshop.model;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
+
+import javax.persistence.*;
+import javax.validation.constraints.NotNull;
+
+
+@Entity
 public class Book {
 
+    @NotNull
+    @Column(unique=true)
     private long isbn;
+    @NotNull
+    @Column(unique=true)
     private String name;
-    private long authorId;
-    private long customerId;
+    @NotNull
+    @JsonManagedReference
+    @ManyToOne
+    private Author author;
+    @ManyToOne
+    private Customer customer;
+    @Id
+    @GeneratedValue(strategy= GenerationType.AUTO)
     private long id;
 
-    public Book(long isbn, String name, long authorId, long customerId, long id) {
+    public Book(long isbn, String name, Author author, Customer customer) {
         this.isbn = isbn;
         this.name = name;
-        this.authorId = authorId;
-        this.customerId = customerId;
-        this.id = id;
+        this.author = author;
+        this.customer = customer;
     }
 
     public Book() {
@@ -35,20 +52,20 @@ public class Book {
         this.name = name;
     }
 
-    public long getAuthorId() {
-        return authorId;
+    public Author getAuthor() {
+        return author;
     }
 
-    public void setAuthorId(long authorId) {
-        this.authorId = authorId;
+    public void setAuthor(Author author) {
+        this.author = author;
     }
 
-    public long getCustomerId() {
-        return customerId;
+    public Customer getCustomer() {
+        return customer;
     }
 
-    public void setCustomerId(long customerId) {
-        this.customerId = customerId;
+    public void setCustomer(Customer customer) {
+        this.customer = customer;
     }
 
     public long getId() {
