@@ -1,5 +1,7 @@
 package exp.exalt.bookshop.util;
 
+import exp.exalt.bookshop.dto.AuthorDto;
+import exp.exalt.bookshop.dto.Mapper;
 import exp.exalt.bookshop.exceptions.author_exceptions.AuthorExistsException;
 import exp.exalt.bookshop.exceptions.author_exceptions.EmptyAuthorListException;
 import exp.exalt.bookshop.exceptions.author_exceptions.AuthorNotFoundException;
@@ -9,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static exp.exalt.bookshop.constants.ConstVar.AUTHOR_CONFLICT;
 import static exp.exalt.bookshop.constants.ConstVar.AUTHOR_NOT_FOUND;
@@ -17,36 +20,42 @@ import static exp.exalt.bookshop.constants.ConstVar.AUTHOR_NOT_FOUND;
 public class AuthorUtil {
     @Autowired
     AuthorService authorService;
+    @Autowired
+    Mapper mapper;
 
-    public List<Author> getAuthors() {
+    public List<AuthorDto> getAuthors() {
         List<Author> authors = authorService.getAuthors();
         if(authors.isEmpty()) {
             throw new EmptyAuthorListException();
         }
-        return authors;
+        return authors.stream()
+                .map(mapper::convertToDto)
+                .collect(Collectors.toList());
     }
 
-    public Author getAuthorById(long id) {
+    public AuthorDto getAuthorById(long id) {
         Author author = authorService.getAuthorById(id);
         if(author == null){
             throw new AuthorNotFoundException(AUTHOR_NOT_FOUND);
         }
-        return author;
+        return mapper.convertToDto(author);
     }
 
-    public List<Author> getAuthorsByName(String name) {
+    public List<AuthorDto> getAuthorsByName(String name) {
         List<Author> authors = authorService.getAuthorsByName(name);
         if(authors.isEmpty()) {
             throw new AuthorNotFoundException(AUTHOR_NOT_FOUND);
         }
-        return authors;
+        return authors.stream()
+                .map(mapper::convertToDto)
+                .collect(Collectors.toList());
     }
 
-    public Author addAuthor(Author author) {
+    public AuthorDto addAuthor(AuthorDto author) {
         if(authorService.getAuthorById(author.getId()) != null) {
             throw new AuthorExistsException(AUTHOR_CONFLICT);
         }
-        authorService.addAuthor(author);
+        authorService.addAuthor(mapper.convertToEntity(author));
         return author;
     }
 

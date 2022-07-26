@@ -1,47 +1,40 @@
 package exp.exalt.bookshop.controllers;
 
-import exp.exalt.bookshop.dto.BookDtoC;
-import exp.exalt.bookshop.dto.Mapper;
+import exp.exalt.bookshop.dto.BookDto;
 import exp.exalt.bookshop.util.BookUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/books")
 public class BookController {
     @Autowired
     BookUtil bookUtil;
-    @Autowired
-    Mapper mapper;
 
     @GetMapping(value = {"/", ""})
     public ResponseEntity<Object> getAllBooks() {
-        return new ResponseEntity<>(bookUtil.getBooks().stream()
-                .map(mapper::convertToDto)
-                .collect(Collectors.toList())
-                , HttpStatus.OK);
+        return new ResponseEntity<>(bookUtil.getBooks(), HttpStatus.OK);
     }
 
     @GetMapping(value = "/{isbn}")
     public ResponseEntity<Object> getBookByIsbn(@PathVariable(value = "isbn") long isbn) {
-        return new ResponseEntity<>(mapper.convertToDto(bookUtil.getBookByIsbn(isbn)), HttpStatus.FOUND);
+        return new ResponseEntity<>(bookUtil.getBookByIsbn(isbn), HttpStatus.FOUND);
     }
 
     @GetMapping(value = "/'{name}'")
     public ResponseEntity<Object> getBooksByName(@PathVariable(value = "name") String name) {
-        return new ResponseEntity<>(bookUtil.getBooksByName(name).stream()
-                .map(mapper::convertToDto)
-                .collect(Collectors.toList())
-                , HttpStatus.FOUND);
+        return new ResponseEntity<>(bookUtil.getBooksByName(name), HttpStatus.FOUND);
     }
 
-    @PostMapping(value = {"/",""})
-    public ResponseEntity<Object> addBook(@RequestBody BookDtoC bookDto)  {
-             bookUtil.addBook(mapper.bookDtoToBook(bookDto));
+    @PostMapping(
+            value = {"/",""},
+            produces = {MediaType.APPLICATION_JSON_VALUE},
+            consumes = "application/json; charset=utf8")
+    public ResponseEntity<Object> addBook(@RequestBody BookDto book)  {
+             bookUtil.addBook(book);
         return new ResponseEntity<>("Book is created successfully", HttpStatus.CREATED);
     }
 

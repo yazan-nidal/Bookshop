@@ -1,5 +1,7 @@
 package exp.exalt.bookshop.util;
 
+import exp.exalt.bookshop.dto.CustomerDto;
+import exp.exalt.bookshop.dto.Mapper;
 import exp.exalt.bookshop.exceptions.customer_exceptions.CustomerExistsException;
 import exp.exalt.bookshop.exceptions.customer_exceptions.CustomerNotFoundException;
 import exp.exalt.bookshop.exceptions.customer_exceptions.EmptyCustomerListException;
@@ -9,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static exp.exalt.bookshop.constants.ConstVar.CUSTOMER_CONFLICT;
 import static exp.exalt.bookshop.constants.ConstVar.CUSTOMER_NOT_FOUND;
@@ -17,36 +20,42 @@ import static exp.exalt.bookshop.constants.ConstVar.CUSTOMER_NOT_FOUND;
 public class CustomerUtil {
     @Autowired
     CustomerService customerService;
+    @Autowired
+    Mapper mapper;
 
-    public List<Customer> getCustomers() {
+    public List<CustomerDto> getCustomers() {
         List<Customer> customers = customerService.getCustomers();
         if(customers.isEmpty()) {
             throw new EmptyCustomerListException();
         }
-        return customers;
+        return customers.stream()
+                .map(mapper::convertToDto)
+                .collect(Collectors.toList());
     }
 
-    public Customer getCustomerById(long id) {
+    public CustomerDto getCustomerById(long id) {
         Customer customer = customerService.getCustomerById(id);
         if(customer == null){
             throw new CustomerNotFoundException(CUSTOMER_NOT_FOUND);
         }
-        return customer;
+        return mapper.convertToDto(customer);
     }
 
-    public List<Customer> getCustomersByName(String name) {
+    public List<CustomerDto> getCustomersByName(String name) {
         List<Customer> customers =  customerService.getCustomersByName(name);
         if( customers.isEmpty()) {
             throw new CustomerNotFoundException(CUSTOMER_NOT_FOUND);
         }
-        return  customers;
+        return  customers.stream()
+                .map(mapper::convertToDto)
+                .collect(Collectors.toList());
     }
 
-    public Customer addCustomer(Customer customer) {
+    public CustomerDto addCustomer(CustomerDto customer) {
         if( customerService.getCustomerById( customer.getId()) != null) {
             throw new CustomerExistsException(CUSTOMER_CONFLICT);
         }
-        customerService.addCustomer( customer);
+        customerService.addCustomer(mapper.convertToEntity(customer));
         return  customer;
     }
 

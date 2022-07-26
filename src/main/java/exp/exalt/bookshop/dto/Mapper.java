@@ -29,10 +29,6 @@ public class Mapper {
         return modelMapper.map(bookDto, Book.class);
     }
 
-    public Book bookDtoToBook(BookDtoC bookDtoC) {
-        return modelMapper.map(bookDtoC, Book.class);
-    }
-
     public Author convertToEntity(AuthorDto authorDto) {
         return modelMapper.map(authorDto, Author.class);
     }
@@ -40,16 +36,5 @@ public class Mapper {
     public Customer convertToEntity(CustomerDto customerDto) {
         return modelMapper.map(customerDto, Customer.class);
     }
-
-    public Author userToAuthor(UserDto userDto) {
-        return modelMapper.map(userDto, Author.class);
-    }
-
-    public Customer userToCustomer(UserDto userDto) {
-        return modelMapper.map(userDto, Customer.class);
-    }
-
-
-
 
 }

@@ -1,27 +1,26 @@
 package exp.exalt.bookshop.dto;
 
-import exp.exalt.bookshop.models.Author;
-import exp.exalt.bookshop.models.Book;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.springframework.lang.Nullable;
 
+import java.io.Serializable;
 import java.util.List;
 
 @Getter
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-public class AuthorDto {
+public class AuthorDto implements Serializable {
+    @JsonInclude(JsonInclude.Include.CUSTOM)
+    @Nullable
     private long id;
+    @JsonInclude(JsonInclude.Include.CUSTOM)
+    @Nullable
     private String name;
-    private List<Book> books;
-
-    public AuthorDto(Author author)
-    {
-        this.id = author.getId();
-        this.name = author.getName();
-        this.setBooks(author.getBooks());
-    }
+    @Nullable
+    private List<BookDto> books;
 }

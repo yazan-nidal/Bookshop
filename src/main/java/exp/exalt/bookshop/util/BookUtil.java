@@ -1,5 +1,7 @@
 package exp.exalt.bookshop.util;
 
+import exp.exalt.bookshop.dto.BookDto;
+import exp.exalt.bookshop.dto.Mapper;
 import exp.exalt.bookshop.exceptions.book_exceptions.BookAuthorNotNullException;
 import exp.exalt.bookshop.exceptions.book_exceptions.BookExistsException;
 import exp.exalt.bookshop.exceptions.book_exceptions.BookNotFoundException;
@@ -10,6 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static exp.exalt.bookshop.constants.ConstVar.*;
 
@@ -17,37 +20,43 @@ import static exp.exalt.bookshop.constants.ConstVar.*;
 public class BookUtil {
     @Autowired
     BookService bookService;
+    @Autowired
+    Mapper mapper;
 
-    public List<Book> getBooks() {
+    public List<BookDto> getBooks() {
         List<Book> books = bookService.getBooks();
         if(books.isEmpty()) {
             throw new EmptyBookListException();
         }
-        return books;
+        return books.stream()
+                .map(mapper::convertToDto)
+                .collect(Collectors.toList());
     }
 
-    public Book getBookByIsbn(long isbn) {
+    public BookDto getBookByIsbn(long isbn) {
         Book book = bookService.getBookByIsbn(isbn);
         if(book == null){
             throw new BookNotFoundException(BOOK_NOT_FOUND);
         }
-        return book;
+        return mapper.convertToDto(book);
     }
 
-    public List<Book> getBooksByName(String name) {
+    public List<BookDto> getBooksByName(String name) {
         List<Book> books = bookService.getBooksByName(name);
         if(books.isEmpty()) {
             throw new BookNotFoundException(BOOK_NOT_FOUND);
         }
-        return books;
+        return books.stream()
+                .map(mapper::convertToDto)
+                .collect(Collectors.toList());
     }
 
-    public Book addBook(Book book) throws BookAuthorNotNullException {
+    public BookDto addBook(BookDto book) throws BookAuthorNotNullException {
         try {
             if(bookService.getBookByIsbn(book.getIsbn()) != null) {
                 throw new BookExistsException(BOOK_CONFLICT);
             }
-            bookService.addBook(book);
+            bookService.addBook(mapper.convertToEntity(book));
         } catch (Exception ex) {
               throw new BookAuthorNotNullException(ex.getMessage());
         }
