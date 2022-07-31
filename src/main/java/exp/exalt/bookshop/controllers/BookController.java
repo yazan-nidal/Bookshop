@@ -28,20 +28,4 @@ public class BookController {
     public ResponseEntity<Object> getBooksByName(@PathVariable(value = "name") String name) {
         return new ResponseEntity<>(bookUtil.getBooksByName(name), HttpStatus.FOUND);
     }
-
-    @PostMapping(
-            value = {"/",""},
-            produces = {MediaType.APPLICATION_JSON_VALUE},
-            consumes = "application/json; charset=utf8")
-    public ResponseEntity<Object> addBook(@RequestBody BookDto book)  {
-             bookUtil.addBook(book);
-        return new ResponseEntity<>("Book is created successfully", HttpStatus.CREATED);
-    }
-
-    @DeleteMapping(value = "/{isbn}")
-    public ResponseEntity<Object> deleteBookByIsbn(@PathVariable(value = "isbn") long isbn) {
-       bookUtil.deleteBook(isbn);
-        return new ResponseEntity<>("Book deleted successfully", HttpStatus.ACCEPTED);
-    }
-
 }
