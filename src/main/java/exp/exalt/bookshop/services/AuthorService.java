@@ -4,8 +4,8 @@ import exp.exalt.bookshop.models.Author;
 import exp.exalt.bookshop.repositories.AuthorRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -13,10 +13,9 @@ public class AuthorService {
     @Autowired
     AuthorRepository authorRepository;
 
-    public List<Author> getAuthors() {
-        List<Author> authors = new ArrayList<>();
-        authorRepository.findAll().forEach(authors::add);
-        return authors;
+    @Transactional
+    public Iterable<Author> getAuthors() {
+        return authorRepository.findAll();
     }
 
     public Author getAuthorById(long id) {
@@ -24,16 +23,15 @@ public class AuthorService {
     }
 
     public List<Author> getAuthorsByName(String name) {
-        List<Author> authors = new ArrayList<>();
-        authorRepository.findAllByName(name).forEach(authors::add);
-        return authors;
+        return authorRepository.findAllByName(name);
     }
 
-    public Author addAuthor(Author author) {
-        authorRepository.save(author);
-        return author;
+    @Transactional
+    public Author addAuthorOrUpdate(Author author) {
+       return authorRepository.save(author);
     }
 
+    @Transactional
     public void deleteAuthor(long id) {
         authorRepository.deleteById(id);
     }

@@ -24,7 +24,7 @@ public class Customer {
     @NotNull
     private String name;
     @JsonBackReference
-    @OneToMany
+    @OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     private List<Book> books;
 
     public void addBook(Book book) {

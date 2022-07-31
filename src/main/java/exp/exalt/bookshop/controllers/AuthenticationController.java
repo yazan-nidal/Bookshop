@@ -5,6 +5,7 @@ import exp.exalt.bookshop.models.AuthenticationResponse;
 import exp.exalt.bookshop.services.MyUserDetailsService;
 import exp.exalt.bookshop.util.JwtUtil;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -26,21 +27,6 @@ public class AuthenticationController {
     @Autowired
     JwtUtil jwtTokenUtil;
 
-    @GetMapping("/")
-    public String welcome() {
-        return "Welcome";
-    }
-
-    @GetMapping("/admin")
-    public String welcomeAdmin() {
-        return "<h1>Welcome Admin</h1>";
-    }
-
-    @GetMapping("/user")
-    public String welcomeUser() {
-        return "<h1>Welcome User</h1>";
-    }
-
     @PostMapping(value = "/authentication")
     public ResponseEntity<Object> createAuthenticationToken(@RequestBody AuthenticationRequest authenticationRequest) throws BadCredentialsException {
         try {
@@ -52,7 +38,7 @@ public class AuthenticationController {
         }
         final UserDetails userDetails = userDetailsService.loadUserByUsername(authenticationRequest.getUsername());
         final String jwt = jwtTokenUtil.generateToken(userDetails);
-        return ResponseEntity.ok(new AuthenticationResponse(jwt));
+        return new ResponseEntity<>(new AuthenticationResponse(jwt), HttpStatus.ACCEPTED);
     }
 
 }

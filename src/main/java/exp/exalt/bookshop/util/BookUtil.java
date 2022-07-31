@@ -1,6 +1,6 @@
 package exp.exalt.bookshop.util;
 
-import exp.exalt.bookshop.dto.BookDto;
+import exp.exalt.bookshop.dto.book_dto.BookDto;
 import exp.exalt.bookshop.dto.Mapper;
 import exp.exalt.bookshop.exceptions.book_exceptions.BookAuthorNotNullException;
 import exp.exalt.bookshop.exceptions.book_exceptions.BookExistsException;
@@ -10,6 +10,7 @@ import exp.exalt.bookshop.models.Book;
 import exp.exalt.bookshop.services.BookService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -51,6 +52,7 @@ public class BookUtil {
                 .collect(Collectors.toList());
     }
 
+    @Transactional
     public BookDto addBook(BookDto book) throws BookAuthorNotNullException {
         try {
             if(bookService.getBookByIsbn(book.getIsbn()) != null) {

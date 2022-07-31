@@ -1,6 +1,6 @@
 package exp.exalt.bookshop.util;
 
-import exp.exalt.bookshop.dto.CustomerDto;
+import exp.exalt.bookshop.dto.customer_dto.CustomerDto;
 import exp.exalt.bookshop.dto.Mapper;
 import exp.exalt.bookshop.exceptions.customer_exceptions.CustomerExistsException;
 import exp.exalt.bookshop.exceptions.customer_exceptions.CustomerNotFoundException;

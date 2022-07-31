@@ -1,4 +1,4 @@
-package exp.exalt.bookshop.dto;
+package exp.exalt.bookshop.dto.author_dto;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.AllArgsConstructor;
@@ -14,14 +14,13 @@ import java.util.List;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-public class CustomerDto implements Serializable {
+public class AuthorDto implements Serializable {
     @JsonInclude(JsonInclude.Include.CUSTOM)
     @Nullable
     private long id;
     @JsonInclude(JsonInclude.Include.CUSTOM)
     @Nullable
     private String name;
-    @JsonInclude(JsonInclude.Include.CUSTOM)
     @Nullable
-    private List<BookDto> books;
+    private List<AuthorBookDto> books;
 }

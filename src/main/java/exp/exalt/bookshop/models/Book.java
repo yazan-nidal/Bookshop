@@ -23,10 +23,10 @@ public class Book {
     private String name;
     @NotNull
     @JsonManagedReference
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     private Author author;
     @JsonManagedReference
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     private Customer customer;
     @Id
     @GeneratedValue(strategy= GenerationType.AUTO)

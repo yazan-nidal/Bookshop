@@ -1,5 +1,8 @@
 package exp.exalt.bookshop.dto;
 
+import exp.exalt.bookshop.dto.author_dto.AuthorDto;
+import exp.exalt.bookshop.dto.book_dto.BookDto;
+import exp.exalt.bookshop.dto.customer_dto.CustomerDto;
 import exp.exalt.bookshop.models.Author;
 import exp.exalt.bookshop.models.Book;
 import exp.exalt.bookshop.models.Customer;
@@ -35,6 +38,10 @@ public class Mapper {
 
     public Customer convertToEntity(CustomerDto customerDto) {
         return modelMapper.map(customerDto, Customer.class);
+    }
+
+    public <P,T> T convertForm(P p,Class<T> dest) {
+        return modelMapper.map(p,dest);
     }
 
 }

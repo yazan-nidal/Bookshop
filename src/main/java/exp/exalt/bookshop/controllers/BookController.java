@@ -1,6 +1,6 @@
 package exp.exalt.bookshop.controllers;
 
-import exp.exalt.bookshop.dto.BookDto;
+import exp.exalt.bookshop.dto.book_dto.BookDto;
 import exp.exalt.bookshop.util.BookUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;

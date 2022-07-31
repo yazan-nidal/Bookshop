@@ -1,6 +1,7 @@
-package exp.exalt.bookshop.dto;
+package exp.exalt.bookshop.dto.author_dto;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
+import exp.exalt.bookshop.dto.customer_dto.CustomerDto;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -13,7 +14,7 @@ import java.io.Serializable;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-public class BookDto implements Serializable {
+public class AuthorBookDto implements Serializable {
     @JsonInclude(JsonInclude.Include.CUSTOM)
     @Nullable
     private long isbn;
@@ -22,11 +23,5 @@ public class BookDto implements Serializable {
     private String name;
     @JsonInclude(JsonInclude.Include.CUSTOM)
     @Nullable
-    private AuthorDto author;
-    @JsonInclude(JsonInclude.Include.CUSTOM)
-    @Nullable
     private CustomerDto customer;
-    @JsonInclude(JsonInclude.Include.CUSTOM)
-    @Nullable
-    private long id;
 }
