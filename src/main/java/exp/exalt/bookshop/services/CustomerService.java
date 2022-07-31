@@ -1,9 +1,11 @@
 package exp.exalt.bookshop.services;
 
+import exp.exalt.bookshop.models.Author;
 import exp.exalt.bookshop.models.Customer;
 import exp.exalt.bookshop.repositories.CustomerRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -13,10 +15,9 @@ public class CustomerService {
     @Autowired
     private CustomerRepository customerRepository;
 
-    public List<Customer> getCustomers() {
-        List<Customer> customers = new ArrayList<>();
-        customerRepository.findAll().forEach(customers::add);
-        return customers;
+    @Transactional
+    public Iterable<Customer> getCustomers() {
+        return customerRepository.findAll();
     }
 
     public Customer getCustomerById(long id) {
@@ -24,16 +25,15 @@ public class CustomerService {
     }
 
     public List<Customer> getCustomersByName(String name) {
-        List<Customer> customers = new ArrayList<>();
-        customerRepository.findAllByName(name).forEach(customers::add);
-        return customers;
+        return customerRepository.findAllByName(name);
     }
 
-    public Customer addCustomer(Customer customer) {
-        customerRepository.save(customer);
-        return customer;
+    @Transactional
+    public Customer addCustomerOrUpdate(Customer customer) {
+        return customerRepository.save(customer);
     }
 
+    @Transactional
     public void deleteCustomer(long id) {
         customerRepository.deleteById(id);
     }
