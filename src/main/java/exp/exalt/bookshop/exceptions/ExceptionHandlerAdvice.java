@@ -4,9 +4,6 @@ import exp.exalt.bookshop.exceptions.author_exceptions.*;
 import exp.exalt.bookshop.exceptions.book_exceptions.BookAuthorNotNullException;
 import exp.exalt.bookshop.exceptions.book_exceptions.BookExistsException;
 import exp.exalt.bookshop.exceptions.book_exceptions.BookNotFoundException;
-import exp.exalt.bookshop.exceptions.customer_exceptions.CustomerExistsException;
-import exp.exalt.bookshop.exceptions.customer_exceptions.CustomerNotFoundException;
-import exp.exalt.bookshop.exceptions.customer_exceptions.EmptyCustomerListException;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
 import org.springframework.http.HttpStatus;
@@ -59,25 +56,6 @@ public class ExceptionHandlerAdvice extends ResponseEntityExceptionHandler
     @ExceptionHandler(AuthorBookNull.class)
     public ResponseEntity<Object> handleAuthorBookNullException(AuthorBookNull ex, WebRequest request) {
         return new ResponseEntity<>(ex, HttpStatus.NO_CONTENT);
-    }
-
-//Customer Exception
-    @ExceptionHandler(EmptyCustomerListException.class)
-    public final ResponseEntity<Object> handleEmptyCustomerListException(EmptyCustomerListException ex, WebRequest request)
-    {
-        return new ResponseEntity<>(ex, HttpStatus.NO_CONTENT);
-    }
-
-    @ExceptionHandler(CustomerNotFoundException.class)
-    public ResponseEntity<Object> handleCustomerNotFoundException(CustomerNotFoundException ex, WebRequest request) {
-        CustomError customError = new CustomError(NOT_FOUND,ex.getMessage(),request.getDescription(false));
-        return buildResponseEntity(customError);
-    }
-
-    @ExceptionHandler(CustomerExistsException.class)
-    public ResponseEntity<Object> handleCustomerExistsException(CustomerExistsException ex, WebRequest request) {
-        CustomError customError = new CustomError(CONFLICT,ex.getMessage(),request.getDescription(false));
-        return buildResponseEntity(customError);
     }
 
     @ExceptionHandler(BookNotFoundException.class)

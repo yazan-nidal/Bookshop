@@ -1,13 +1,19 @@
 package exp.exalt.bookshop.util;
 
+import exp.exalt.bookshop.constants.RoleID;
+import exp.exalt.bookshop.dto.author_dto.AuthorBookDto;
 import exp.exalt.bookshop.dto.book_dto.BookDto;
 import exp.exalt.bookshop.dto.customer_dto.CustomerBookDto;
 import exp.exalt.bookshop.dto.customer_dto.CustomerDto;
 import exp.exalt.bookshop.dto.Mapper;
 import exp.exalt.bookshop.exceptions.author_exceptions.*;
 import exp.exalt.bookshop.exceptions.book_exceptions.BookExistsException;
+import exp.exalt.bookshop.models.Author;
 import exp.exalt.bookshop.models.Book;
 import exp.exalt.bookshop.models.Customer;
+import exp.exalt.bookshop.models.Role;
+import exp.exalt.bookshop.repositories.BookRepository;
+import exp.exalt.bookshop.services.BookService;
 import exp.exalt.bookshop.services.CustomerService;
 import org.modelmapper.ConfigurationException;
 import org.modelmapper.MappingException;
@@ -25,6 +31,8 @@ import static exp.exalt.bookshop.constants.ConstVar.MODEL_MAPPER_ILLEGAL_EXCEPTI
 public class CustomerUtil {
     @Autowired
     CustomerService customerService;
+    @Autowired
+    BookService bookService;
     @Autowired
     Mapper mapper;
 
@@ -62,7 +70,8 @@ public class CustomerUtil {
     }
 
     public CustomerDto addCustomer(CustomerDto customer) {
-        CustomerDto customerDto;
+        CustomerDto customerDto = null;
+        customer.getRoles().add(new Role(2, RoleID.CUSTOMER.getRole()));
         Customer customerI= convertNewForm(customer, Customer.class);
         List<Book> books = customerI.getBooks();
         customerI.setBooks(new ArrayList<>());
@@ -77,10 +86,8 @@ public class CustomerUtil {
     private Customer addCustomerBooks(Customer customer, List<Book> books){
 
             for(Book book: books) {
-                book.setCustomer(customer);
-                if((book.getIsbn() == 0)
-                        || (customer.getBookByIsbn(book.getIsbn()) != null)) {
-                    throw new BookExistsException(BOOK_EXISTS);
+                if(bookService.getBookByIsbn(book.getIsbn()) != null) {
+                    book.setCustomer(customer);
                 }
             }
             customer.addBooks(books);
@@ -143,43 +150,24 @@ public class CustomerUtil {
         return customerDto;
     }
 
-    public CustomerDto rentCustomerBook(long id, BookDto bookDto) throws AuthorGeneralException {
-        CustomerDto customerDto;
+    public CustomerDto rentCustomerBook(long id, long isbn) throws AuthorGeneralException {
+        CustomerDto customerDto = null;
             Customer customer = customerService.getCustomerById(id);
-            customerDto = convertNewForm(rentCustomerBook(customer,bookDto),CustomerDto.class);
+            Book book = bookService.getBookByIsbn(isbn);
+            if(book != null) {
+                customerDto = convertNewForm(rentCustomerBook(customer,book), CustomerDto.class);
+            }
         return customerDto;
     }
 
-    private Customer rentCustomerBook(Customer customer, BookDto bookDto){
-            Book book = convertNewForm(bookDto,Book.class);
+    private Customer rentCustomerBook(Customer customer, Book book){
+            if(book.getCustomer() == null) {
             book.setCustomer(customer);
             customer.addBook(book);
+    }
             customer = customerService.addCustomerOrUpdate(customer);
         return customer;
     }
-
-    public CustomerDto rentCustomerBooks(long id, List<BookDto> bookDtoList) throws AuthorGeneralException {
-        CustomerDto customerDto;
-           Customer customer = customerService.getCustomerById(id);
-            List<Book> books = mapListForm(bookDtoList,Book.class);
-            customerDto = convertNewForm(rentCustomerBooks(customer,books),CustomerDto.class);
-        return customerDto;
-    }
-
-    private Customer rentCustomerBooks(Customer customer, List<Book> books){
-            for(Book book: books) {
-                book.setCustomer(customer);
-                if((book.getIsbn() == 0)
-                        || (customer.getBookByIsbn(book.getIsbn()) != null)) {
-                    throw new BookExistsException(BOOK_EXISTS);
-                }
-            }
-            customer.addBooks(books);
-            customerService.addCustomerOrUpdate(customer);
-            customer = customerService.getCustomerById(customer.getId());
-        return customer;
-    }
-
 
     public CustomerBookDto returnCustomerBook(long id, long isbn){
         CustomerBookDto bookDto;
@@ -213,6 +201,14 @@ public class CustomerUtil {
             customer.removeAllBooks();
             customerService.addCustomerOrUpdate(customer);
             bookDtoList = mapListForm(books,BookDto.class);
+        return bookDtoList;
+    }
+
+    public List<CustomerBookDto> getCustomerBooks(long id){
+        List<CustomerBookDto> bookDtoList;
+            Customer customer = customerService.getCustomerById(id);
+            List<Book> books = customer.getBooks();
+            bookDtoList = mapListForm(books,CustomerBookDto.class);
         return bookDtoList;
     }
 

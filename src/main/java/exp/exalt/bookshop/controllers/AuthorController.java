@@ -32,7 +32,7 @@ public class AuthorController {
         return new ResponseEntity<>(authorUtil.getAuthorsByName(name), HttpStatus.FOUND);
     }
 
-    @PostMapping(value = {"/",""})
+    @PostMapping(value = {"/create/author"})
     public ResponseEntity<Object> addAuthor(@RequestBody AuthorDto author) {
         return new ResponseEntity<>( authorUtil.addAuthor(author), HttpStatus.CREATED);
     }

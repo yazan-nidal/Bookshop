@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.github.fge.jsonpatch.JsonPatch;
 import com.github.fge.jsonpatch.JsonPatchException;
+import exp.exalt.bookshop.constants.RoleID;
 import exp.exalt.bookshop.dto.author_dto.AuthorBookDto;
 import exp.exalt.bookshop.dto.author_dto.AuthorDto;
 import exp.exalt.bookshop.dto.book_dto.BookDto;
@@ -12,6 +13,7 @@ import exp.exalt.bookshop.exceptions.author_exceptions.*;
 import exp.exalt.bookshop.exceptions.book_exceptions.BookExistsException;
 import exp.exalt.bookshop.models.Author;
 import exp.exalt.bookshop.models.Book;
+import exp.exalt.bookshop.models.Role;
 import exp.exalt.bookshop.services.AuthorService;
 import org.modelmapper.ConfigurationException;
 import org.modelmapper.MappingException;
@@ -94,6 +96,7 @@ public class AuthorUtil {
             if(authorService.getAuthorById(author.getId()) != null) {
                 throw new AuthorExistsException(AUTHOR_CONFLICT);
             }
+            author.getRoles().add(new Role(2, RoleID.AUTHOR.getRole()));
             authorDto = addAuthorWithOptionalBooks(author);
         } catch (IllegalArgumentException ex) {
             throw new AuthorGeneralException(AUTHOR_ID_IS_NULL

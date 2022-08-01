@@ -5,29 +5,28 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.userdetails.User;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.function.Predicate;
-
 @Getter
 @Setter
-@AllArgsConstructor
-@NoArgsConstructor
 @Entity
-@Table(name = "Author")
-public class Author {
-    @Id
-    private long id;
+@NoArgsConstructor
+@AllArgsConstructor
+@Table(name = "Authors")
+public class Author extends BookShopUser{
     @NotNull
     private String name;
     @JsonBackReference
     @OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Book> books;
-
     public void addBook(Book book) {
         this.books.add(book);
     }
