@@ -17,7 +17,7 @@ import org.springframework.test.annotation.Rollback;
 @DataJpaTest
 @AutoConfigureTestDatabase(replace = Replace.NONE)
 @Rollback(false)
-public class UserRepositoryTests {
+class UserRepositoryTests {
 
     @Autowired
     private TestEntityManager entityManager;
@@ -29,7 +29,7 @@ public class UserRepositoryTests {
     private RoleRepository roleRepo;
 
     @Test
-    public void testCreateUser() {
+    void testCreateUser() {
         BookShopUser user = new BookShopUser();
         user.setUsername("testI");
         user.setPassword("exalt_00");
@@ -40,7 +40,7 @@ public class UserRepositoryTests {
     }
 
     @Test
-    public void testAddRoleToNewUser() {
+    void testAddRoleToNewUser() {
         Role roleAdmin = roleRepo.findByName("AUTHOR");
         BookShopUser user = new BookShopUser();
         user.setUsername("testI");
@@ -48,17 +48,17 @@ public class UserRepositoryTests {
         user.setId((long)5);
         user.getRoles().add(roleAdmin);
         BookShopUser savedUser = userRepo.save(user);
-        assertThat(savedUser.getRoles().size()).isEqualTo(1);
+        assertThat(""+savedUser.getRoles().size()).hasSize(1);
     }
 
     @Test
-    public void testAddRoleToExistingUser() {
+    void testAddRoleToExistingUser() {
         BookShopUser user = userRepo.findByUsername("testI").orElse(null);
         Role roleUser = roleRepo.findByName("ADMIN");
         Role roleCustomer = new Role(4,"TEST");
         user.getRoles().add(roleUser);
         user.getRoles().add(roleCustomer);
         BookShopUser savedUser = userRepo.save(user);
-        assertThat(savedUser.getRoles().size()).isEqualTo(2);
+        assertThat(""+savedUser.getRoles().size()).hasSize(2);
     }
 }

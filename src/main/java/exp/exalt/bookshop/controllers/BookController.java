@@ -1,10 +1,8 @@
 package exp.exalt.bookshop.controllers;
 
-import exp.exalt.bookshop.dto.book_dto.BookDto;
 import exp.exalt.bookshop.util.BookUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 

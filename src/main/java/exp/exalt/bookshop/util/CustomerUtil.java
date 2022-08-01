@@ -1,18 +1,14 @@
 package exp.exalt.bookshop.util;
 
 import exp.exalt.bookshop.constants.RoleID;
-import exp.exalt.bookshop.dto.author_dto.AuthorBookDto;
 import exp.exalt.bookshop.dto.book_dto.BookDto;
 import exp.exalt.bookshop.dto.customer_dto.CustomerBookDto;
 import exp.exalt.bookshop.dto.customer_dto.CustomerDto;
 import exp.exalt.bookshop.dto.Mapper;
 import exp.exalt.bookshop.exceptions.author_exceptions.*;
-import exp.exalt.bookshop.exceptions.book_exceptions.BookExistsException;
-import exp.exalt.bookshop.models.Author;
 import exp.exalt.bookshop.models.Book;
 import exp.exalt.bookshop.models.Customer;
 import exp.exalt.bookshop.models.Role;
-import exp.exalt.bookshop.repositories.BookRepository;
 import exp.exalt.bookshop.services.BookService;
 import exp.exalt.bookshop.services.CustomerService;
 import org.modelmapper.ConfigurationException;
@@ -24,7 +20,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static exp.exalt.bookshop.constants.ConstVar.*;
 import static exp.exalt.bookshop.constants.ConstVar.MODEL_MAPPER_ILLEGAL_EXCEPTION;
 
 @Service
@@ -134,12 +129,7 @@ public class CustomerUtil {
     }
 
     private List<BookDto> deleteCustomerBooks(Customer customer) {
-        List<BookDto> bookDtoList;
-            List<Book> books = new ArrayList<>(customer.getBooks());
-            customer.removeAllBooks();
-            customerService.addCustomerOrUpdate(customer);
-            bookDtoList = mapListForm(books,BookDto.class);
-        return bookDtoList;
+        return returnCustomerBooks(customer);
     }
 
     public CustomerDto deleteCustomer(long id){

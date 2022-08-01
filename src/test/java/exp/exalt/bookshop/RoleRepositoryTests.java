@@ -16,12 +16,12 @@ import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 @DataJpaTest
 @AutoConfigureTestDatabase(replace = Replace.NONE)
 @Rollback(false)
-public class RoleRepositoryTests {
+class RoleRepositoryTests {
 
     @Autowired private RoleRepository repo;
 
     @Test
-    public void testCreateRoles() {
+    void testCreateRoles() {
         Role author = new Role(2,"AUTHOR");
         Role admin = new Role(1,"ADMIN");
         Role customer = new Role(3,"CUSTOMER");
@@ -30,7 +30,7 @@ public class RoleRepositoryTests {
 
         List<Role> listRoles = repo.findAll();
 
-        assertThat(listRoles.size()).isEqualTo(3);
+        assertThat(listRoles.size()+"").hasSize(3);
     }
 
 }

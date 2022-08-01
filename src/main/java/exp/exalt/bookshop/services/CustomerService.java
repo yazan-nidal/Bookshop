@@ -1,13 +1,11 @@
 package exp.exalt.bookshop.services;
 
-import exp.exalt.bookshop.models.Author;
 import exp.exalt.bookshop.models.Customer;
 import exp.exalt.bookshop.repositories.CustomerRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
 import java.util.List;
 
 @Service

@@ -1,20 +1,14 @@
 package exp.exalt.bookshop.util;
 
-import com.fasterxml.jackson.databind.util.ArrayIterator;
 import exp.exalt.bookshop.dto.book_dto.BookDto;
 import exp.exalt.bookshop.dto.Mapper;
 import exp.exalt.bookshop.exceptions.author_exceptions.AuthorGeneralException;
-import exp.exalt.bookshop.exceptions.book_exceptions.BookAuthorNotNullException;
-import exp.exalt.bookshop.exceptions.book_exceptions.BookExistsException;
-import exp.exalt.bookshop.exceptions.book_exceptions.BookNotFoundException;
-import exp.exalt.bookshop.exceptions.book_exceptions.EmptyBookListException;
 import exp.exalt.bookshop.models.Book;
 import exp.exalt.bookshop.services.BookService;
 import org.modelmapper.ConfigurationException;
 import org.modelmapper.MappingException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;

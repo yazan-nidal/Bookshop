@@ -1,7 +1,5 @@
 package exp.exalt.bookshop.models;
 
-import exp.exalt.bookshop.models.BookShopUser;
-import exp.exalt.bookshop.models.Role;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
