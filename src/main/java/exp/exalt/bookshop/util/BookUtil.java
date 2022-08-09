@@ -38,6 +38,10 @@ public class BookUtil {
         return mapListForm(bookService.getBooksByName(name), BookDto.class);
     }
 
+    public BookDto getBookById(long book_id) {
+        return convertNewForm(bookService.getBookById(book_id), BookDto.class);
+    }
+
     // map methods
     private <P,T> List<T> mapListForm(List<P> p, Class<T> dest) {
         List<T>  t;
@@ -64,5 +68,4 @@ public class BookUtil {
         }
         return t;
     }
-
 }

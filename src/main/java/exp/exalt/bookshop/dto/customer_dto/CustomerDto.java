@@ -1,7 +1,8 @@
 package exp.exalt.bookshop.dto.customer_dto;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
-import exp.exalt.bookshop.models.Role;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
+import exp.exalt.bookshop.dto.book_dto.BookDto;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -10,9 +11,7 @@ import org.springframework.lang.Nullable;
 
 import javax.persistence.Column;
 import java.io.Serializable;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 @Getter
 @Setter
@@ -21,13 +20,14 @@ import java.util.Set;
 public class CustomerDto implements Serializable {
     @JsonInclude(JsonInclude.Include.CUSTOM)
     @Nullable
-    private long id;
+    private long id = Integer.MIN_VALUE;
     @JsonInclude(JsonInclude.Include.CUSTOM)
     @Nullable
     private String name;
     @JsonInclude(JsonInclude.Include.CUSTOM)
     @Nullable
-    private List<CustomerBookDto> books;
+    @JsonManagedReference("customer-book")
+    private List<BookDto> books;
     @JsonInclude(JsonInclude.Include.CUSTOM)
     @Column(nullable = true)
     String username;
@@ -36,5 +36,5 @@ public class CustomerDto implements Serializable {
     String password;
     @JsonInclude(JsonInclude.Include.CUSTOM)
     @Column(nullable = true)
-    private Set<Role> roles = new HashSet<>();
+    private int role = Integer.MIN_VALUE;
 }

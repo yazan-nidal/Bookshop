@@ -1,8 +1,10 @@
 package exp.exalt.bookshop.util;
 
-import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.SignatureAlgorithm;
+import exp.exalt.bookshop.constants.ConstVar;
+import exp.exalt.bookshop.exceptions.GeneralException;
+import exp.exalt.bookshop.exceptions.author_exceptions.AuthorGeneralException;
+import exp.exalt.bookshop.models.BookShopUser;
+import io.jsonwebtoken.*;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
@@ -50,5 +52,77 @@ public class JwtUtil {
     public Boolean validateToken(String token, UserDetails userDetails) {
         final String username = extractUsername(token);
         return (username.equals(userDetails.getUsername()) && !isTokenExpired(token));
+    }
+
+    // helper method  for user
+    public String getUserName(String token) {
+        String jwt = null;
+        String usernameExtracted = null;
+        try {
+            if (token != null && token.startsWith("Bearer ")) {
+                jwt = token.substring(7);
+                usernameExtracted = extractUsername(jwt);
+            }
+            if (usernameExtracted != null
+                    && !usernameExtracted.isEmpty()) {
+                return usernameExtracted;
+            }
+        } catch (SignatureException ex){
+            throw new GeneralException("Invalid JWT signature");
+        } catch (MalformedJwtException ex){
+            throw new GeneralException("Invalid JWT token");
+        } catch (ExpiredJwtException ex){
+            throw new GeneralException("Expired JWT token");
+        } catch (UnsupportedJwtException ex){
+            throw new GeneralException("Unsupported JWT token");
+        } catch (IllegalArgumentException ex){
+            throw new GeneralException("JWT claims string is empty");
+        }
+        return "";
+    }
+
+    public boolean checkAuthentication(String token, String username){
+        String jwt = null;
+        String usernameExtracted = null;
+        try {
+            if (token != null && token.startsWith("Bearer ")) {
+                jwt = token.substring(7);
+                usernameExtracted = extractUsername(jwt);
+            }
+            if (usernameExtracted != null
+                    && !usernameExtracted.isEmpty()) {
+                return username.equals(usernameExtracted);
+            }
+        } catch (SignatureException ex){
+            throw new GeneralException("Invalid JWT signature");
+        } catch (MalformedJwtException ex){
+            throw new GeneralException("Invalid JWT token");
+        } catch (ExpiredJwtException ex){
+            throw new GeneralException("Expired JWT token");
+        } catch (UnsupportedJwtException ex){
+            throw new GeneralException("Unsupported JWT token");
+        } catch (IllegalArgumentException ex){
+            throw new GeneralException("JWT claims string is empty");
+        }
+        return false;
+    }
+
+    public boolean isValidateToken(String token, BookShopUser bookShopUser) {
+        try {
+            final String username = getUserName(token);
+            return (username.equals(bookShopUser.getUsername()) && !isTokenExpired(token));
+        } catch (SignatureException ex){
+            throw new GeneralException("Invalid JWT signature");
+        } catch (MalformedJwtException ex){
+            throw new GeneralException("Invalid JWT token");
+        } catch (ExpiredJwtException ex){
+            throw new GeneralException("Expired JWT token");
+        } catch (UnsupportedJwtException ex){
+            throw new GeneralException("Unsupported JWT token");
+        } catch (IllegalArgumentException ex){
+            throw new GeneralException("JWT claims string is empty");
+        } catch (NullPointerException ex) {
+            throw new GeneralException(ConstVar.SERVER_ERROR);
+        }
     }
 }

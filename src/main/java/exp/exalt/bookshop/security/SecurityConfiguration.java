@@ -1,14 +1,16 @@
 package exp.exalt.bookshop.security;
 
-import exp.exalt.bookshop.constants.RoleID;
+import exp.exalt.bookshop.models.RoleID;
 import exp.exalt.bookshop.filters.JwtRequestFilter;
 import exp.exalt.bookshop.services.MyUserDetailsService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.builders.WebSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.config.http.SessionCreationPolicy;
@@ -26,6 +28,13 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
     private MyUserDetailsService userDetailService;
     @Autowired
     JwtRequestFilter jwtRequestFilter;
+    @Value("${spring.websecurity.debug:false}")
+    boolean webSecurityDebug;
+
+    @Override
+    public void configure(WebSecurity web) throws Exception {
+        web.debug(webSecurityDebug);
+    }
 
     @Bean
     public UserDetailsService userDetailsService() {
@@ -49,10 +58,10 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
     protected void configure(HttpSecurity http) throws Exception {
         http.csrf().disable()
                 .authorizeRequests().antMatchers("/authentication").permitAll()
-                .antMatchers("/authors*").hasAnyRole(RoleID.AUTHOR.getRole(),RoleID.ADMIN.getRole())
-                .antMatchers("/customers*").hasAnyRole(RoleID.CUSTOMER.getRole(),RoleID.ADMIN.getRole())
-                .antMatchers("/books*").hasAnyRole(RoleID.ADMIN.getRole(),RoleID.CUSTOMER.getRole(),RoleID.AUTHOR.getRole())
-                .antMatchers("/authors/create/author","/customers/create/customer").hasAnyRole(RoleID.ADMIN.getRole())
+                .antMatchers("/authors/create/author","/customers/create/customer").hasAnyRole(RoleID.getRole(0))
+                .antMatchers("/authors*").hasAnyRole(RoleID.getRole(0), RoleID.getRole(1))
+                .antMatchers("/customers*").hasAnyRole(RoleID.getRole(0), RoleID.getRole(2))
+                .antMatchers("/books*").hasAnyRole(RoleID.getRole(0), RoleID.getRole(1), RoleID.getRole(2))
                 .anyRequest().authenticated()
                 .and().sessionManagement()
                 .sessionCreationPolicy(SessionCreationPolicy.STATELESS)

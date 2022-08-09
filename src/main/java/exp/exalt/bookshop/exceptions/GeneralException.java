@@ -1,21 +1,21 @@
-package exp.exalt.bookshop.exceptions.author_exceptions;
+package exp.exalt.bookshop.exceptions;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ResponseStatus;
 
-@ResponseStatus(value = HttpStatus.CONFLICT)
-public class AuthorExistsException extends RuntimeException {
-    private static final long serialVersionUID = 3L;
+@ResponseStatus(value = HttpStatus.INTERNAL_SERVER_ERROR)
+public class GeneralException extends RuntimeException{
+    private static final long serialVersionUID = 1411414L;
     final String message;
     private HttpStatus httpStatus;
 
-    public AuthorExistsException(String message) {
+    public GeneralException(String message) {
         super(message);
         this.message = message;
-        this.httpStatus = HttpStatus.CONFLICT;
+        httpStatus = HttpStatus.INTERNAL_SERVER_ERROR;
     }
-    
-    public AuthorExistsException(String message,HttpStatus httpStatus) {
+
+    public GeneralException(String message, HttpStatus httpStatus) {
         super(message);
         this.message = message;
         this.httpStatus = httpStatus;

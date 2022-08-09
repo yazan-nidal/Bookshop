@@ -1,12 +1,18 @@
 package exp.exalt.bookshop.repositories;
 
+import exp.exalt.bookshop.models.Author;
 import exp.exalt.bookshop.models.Customer;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.stereotype.Repository;
 
+import javax.transaction.Transactional;
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface CustomerRepository extends CrudRepository<Customer,Long> {
     List<Customer> findAllByName(String name);
+    Optional<Customer> findByUsername(String username);
+    @Transactional
+    void deleteByUsername(String username);
 }

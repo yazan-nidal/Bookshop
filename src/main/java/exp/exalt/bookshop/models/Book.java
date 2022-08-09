@@ -1,5 +1,6 @@
 package exp.exalt.bookshop.models;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -8,6 +9,7 @@ import lombok.Setter;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
+import java.io.Serializable;
 
 @Getter
 @Setter
@@ -15,18 +17,18 @@ import javax.validation.constraints.NotNull;
 @NoArgsConstructor
 @Entity
 @Table(name = "Book")
-public class Book {
+public class Book implements Serializable {
     @NotNull
     @Column(unique=true)
     private long isbn;
     @NotNull
     private String name;
     @NotNull
-    @JsonManagedReference
-    @ManyToOne(fetch = FetchType.LAZY)
+    @JsonBackReference("author-book")
+    @ManyToOne(cascade = { })
     private Author author;
-    @JsonManagedReference
-    @ManyToOne(fetch = FetchType.LAZY)
+    @JsonBackReference("customer-book")
+    @ManyToOne(cascade = {CascadeType.MERGE,CascadeType.PERSIST,CascadeType.REMOVE})
     private Customer customer;
     @Id
     @GeneratedValue(strategy= GenerationType.AUTO)

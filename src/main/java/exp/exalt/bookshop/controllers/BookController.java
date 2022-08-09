@@ -26,4 +26,9 @@ public class BookController {
     public ResponseEntity<Object> getBooksByName(@PathVariable(value = "name") String name) {
         return new ResponseEntity<>(bookUtil.getBooksByName(name), HttpStatus.FOUND);
     }
+
+    @GetMapping(value = "/book/{book_id}")
+    public ResponseEntity<Object> getBooksByName(@PathVariable(value = "book_id") long book_id) {
+        return new ResponseEntity<>(bookUtil.getBookById(book_id), HttpStatus.FOUND);
+    }
 }

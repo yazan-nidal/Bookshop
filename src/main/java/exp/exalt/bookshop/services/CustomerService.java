@@ -14,14 +14,21 @@ public class CustomerService {
     private CustomerRepository customerRepository;
 
     @Transactional
+
     public Iterable<Customer> getCustomers() {
         return customerRepository.findAll();
     }
-
+    @Transactional
     public Customer getCustomerById(long id) {
         return customerRepository.findById(id).orElse(null);
     }
 
+    @Transactional
+    public Customer getCustomerByUsername(String username) {
+        return customerRepository.findByUsername(username).orElse(null);
+    }
+
+    @Transactional
     public List<Customer> getCustomersByName(String name) {
         return customerRepository.findAllByName(name);
     }
@@ -34,5 +41,10 @@ public class CustomerService {
     @Transactional
     public void deleteCustomer(long id) {
         customerRepository.deleteById(id);
+    }
+
+    @Transactional
+    public void deleteCustomer(String username) {
+        customerRepository.deleteByUsername(username);
     }
 }

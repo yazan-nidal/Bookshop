@@ -7,9 +7,7 @@ import lombok.Setter;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.Set;
+import java.io.Serializable;
 
 @Getter
 @Setter
@@ -18,31 +16,18 @@ import java.util.Set;
 @AllArgsConstructor
 @Table(name = "users")
 @Inheritance(strategy = InheritanceType.JOINED)
-public class BookShopUser {
+public class BookShopUser implements Serializable {
     @Id
+    @Column(name = "id", nullable = false)
+    @GeneratedValue(strategy= GenerationType.AUTO)
     private Long id;
     @Column(nullable = false, unique = true)
-   private String username;
+    private String username;
+    @Column(nullable = false)
+    private String password;
     @NotNull
-   private String password;
-    @ManyToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
-    @JoinTable(
-            name = "users_roles",
-            joinColumns = @JoinColumn(name = "id"),
-            inverseJoinColumns = @JoinColumn(name = "role_id")
-    )
-    private Set<Role> roles = new HashSet<>();
+    private String name;
+    @NotNull
+    private  int role;
     private boolean enabled = true;
-
-    public boolean hasRole(String roleName) {
-        Iterator<Role> iterator = this.roles.iterator();
-        while (iterator.hasNext()) {
-            Role role = iterator.next();
-            if (role.getName().equals(roleName)) {
-                return true;
-            }
-        }
-        return false;
-    }
-
 }

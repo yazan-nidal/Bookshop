@@ -18,11 +18,23 @@ public class BookService {
         return bookRepository.findAll();
     }
 
+    @Transactional
     public Book getBookByIsbn(long isbn) {
         return bookRepository.findByIsbn(isbn).orElse(null);
     }
 
+    @Transactional
+    public Book getBookById(long id) {
+        return bookRepository.findById(id).orElse(null);
+    }
+
+    @Transactional
     public List<Book> getBooksByName(String name) {
        return bookRepository.findAllByName(name);
+    }
+
+    @Transactional
+    public Book updateBook(Book book) {
+        return bookRepository.save(book);
     }
 }

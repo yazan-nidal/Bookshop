@@ -1,18 +1,15 @@
 package exp.exalt.bookshop.models;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.userdetails.User;
 
 import javax.persistence.*;
-import javax.validation.constraints.NotNull;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 import java.util.function.Predicate;
 
@@ -23,10 +20,8 @@ import java.util.function.Predicate;
 @AllArgsConstructor
 @Table(name = "Customers")
 public class Customer extends BookShopUser {
-    @NotNull
-    private String name;
-    @JsonBackReference
-    @OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+    @JsonManagedReference("customer-book")
+    @OneToMany(fetch = FetchType.EAGER,mappedBy = "customer",cascade = {CascadeType.MERGE,CascadeType.PERSIST,CascadeType.REMOVE})
     private List<Book> books;
 
     public void addBook(Book book) {
@@ -49,6 +44,10 @@ public class Customer extends BookShopUser {
 
     public Book getBookByIsbn(long isbn){
         return books.stream().filter(book -> book.getIsbn() == isbn).findFirst().orElse(null);
+    }
+
+    public Book getBookById(long id){
+        return books.stream().filter(book -> book.getId() == id).findFirst().orElse(null);
     }
 
     public boolean removeAllBooks() {

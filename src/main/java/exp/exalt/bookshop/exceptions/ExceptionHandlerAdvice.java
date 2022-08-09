@@ -19,17 +19,50 @@ import static org.springframework.http.HttpStatus.*;
 @ControllerAdvice
 public class ExceptionHandlerAdvice extends ResponseEntityExceptionHandler
 {
-//Author Exception
-    @ExceptionHandler(AuthorNull.class)
-    public ResponseEntity<Object> handleAuthorNullException(AuthorNull ex, WebRequest request) {
-        return new ResponseEntity<>(ex, HttpStatus.NO_CONTENT);
+    @ExceptionHandler(GeneralException.class)
+    public ResponseEntity<Object> handleGeneralException(GeneralException ex, WebRequest request) {
+        CustomError customError = new CustomError(ex.getHttpStatus(),ex.getMessage(),request.getDescription(false));
+        return buildResponseEntity(customError);
     }
+
 
     @ExceptionHandler(AuthorGeneralException.class)
     public ResponseEntity<Object> handleAuthorGeneralException(AuthorGeneralException ex, WebRequest request) {
-        CustomError customError = new CustomError(INTERNAL_SERVER_ERROR,ex.getMessage(),request.getDescription(false));
+        CustomError customError = new CustomError(ex.getHttpStatus(),ex.getMessage(),request.getDescription(false));
         return buildResponseEntity(customError);
     }
+
+    @ExceptionHandler(AuthorNullException.class)
+    public ResponseEntity<Object> handleAuthorNullException(AuthorNullException ex, WebRequest request) {
+        CustomError customError = new CustomError(ex.getStatus(),ex.getMessage(),request.getDescription(false));
+        return buildResponseEntity(customError);
+    }
+
+    @ExceptionHandler(AuthorExistsException.class)
+    public ResponseEntity<Object> handleAuthorExistsException(AuthorExistsException ex, WebRequest request) {
+        CustomError customError = new CustomError(ex.getHttpStatus(),ex.getMessage(),request.getDescription(false));
+        return buildResponseEntity(customError);
+    }
+
+    @ExceptionHandler(AuthorBookNull.class)
+    public ResponseEntity<Object> handleAuthorBookNullException(AuthorBookNull ex, WebRequest request) {
+        CustomError customError = new CustomError(ex.getHttpStatus(),ex.getMessage(),request.getDescription(false));
+        return buildResponseEntity(customError);
+    }
+
+
+    @ExceptionHandler(BookExistsException.class)
+    public ResponseEntity<Object> handleBookExistsException(BookExistsException ex, WebRequest request) {
+        CustomError customError = new CustomError(ex.getHttpStatus(), ex.getMessage(),request.getDescription(false));
+        return buildResponseEntity(customError);
+    }
+
+
+
+//Author Exception
+
+
+
 
     @ExceptionHandler(EmptyAuthorListException.class)
     public final ResponseEntity<Object> handleEmptyAuthorListException(EmptyAuthorListException ex, WebRequest request)
@@ -39,23 +72,16 @@ public class ExceptionHandlerAdvice extends ResponseEntityExceptionHandler
 
     @ExceptionHandler(AuthorNotFoundException.class)
     public ResponseEntity<Object> handleAuthorNotFoundException(AuthorNotFoundException ex, WebRequest request) {
-        return new ResponseEntity<>(ex, HttpStatus.NO_CONTENT);
-    }
-
-    @ExceptionHandler(AuthorExistsException.class)
-    public ResponseEntity<Object> handleAuthorExistsException(AuthorExistsException ex, WebRequest request) {
-        CustomError customError = new CustomError(CONFLICT,ex.getMessage(),request.getDescription(false));
+        CustomError customError = new CustomError(ex.getHttpStatus(),ex.getMessage(),request.getDescription(false));
         return buildResponseEntity(customError);
     }
 
+
+
     @ExceptionHandler(AuthorBookNotFound.class)
     public ResponseEntity<Object> handleAuthorBookNotFound(AuthorBookNotFound ex, WebRequest request) {
-        return new ResponseEntity<>(ex, HttpStatus.NO_CONTENT);
-    }
-
-    @ExceptionHandler(AuthorBookNull.class)
-    public ResponseEntity<Object> handleAuthorBookNullException(AuthorBookNull ex, WebRequest request) {
-        return new ResponseEntity<>(ex, HttpStatus.NO_CONTENT);
+        CustomError customError = new CustomError(ex.getHttpStatus(),ex.getMessage(),request.getDescription(false));
+        return buildResponseEntity(customError);
     }
 
     @ExceptionHandler(BookNotFoundException.class)
@@ -64,11 +90,6 @@ public class ExceptionHandlerAdvice extends ResponseEntityExceptionHandler
         return buildResponseEntity(customError);
     }
 
-    @ExceptionHandler(BookExistsException.class)
-    public ResponseEntity<Object> handleBookExistsException(BookExistsException ex, WebRequest request) {
-        CustomError customError = new CustomError(CONFLICT,ex.getMessage(),request.getDescription(false));
-        return buildResponseEntity(customError);
-    }
 
     @ExceptionHandler(BookAuthorNotNullException.class)
     public ResponseEntity<Object> handleBookAuthorNotNullException(BookAuthorNotNullException ex, WebRequest request) {
