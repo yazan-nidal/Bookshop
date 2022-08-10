@@ -580,7 +580,7 @@ public class AuthorUtil {
               throw new BookExistsException(message,HttpStatus.CONFLICT);
           }
           if(bookDto.getCustomer() != null) {
-              String message = FOR_EACH_ACTION +" \\ "+BAD_REQUEST;
+              String message = FORCE_RENT_BOOK +" \\ "+BAD_REQUEST;
               log.debug(message);
               throw new AuthorGeneralException(message,HttpStatus.CONFLICT);
           }
