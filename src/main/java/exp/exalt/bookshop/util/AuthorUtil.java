@@ -1,6 +1,6 @@
 package exp.exalt.bookshop.util;
 
-import exp.exalt.bookshop.dto.author_dto.AuthorDtoO;
+import exp.exalt.bookshop.dto.author_dto.AuthorResponseDTO;
 import exp.exalt.bookshop.dto.book_dto.BookDtoO;
 import exp.exalt.bookshop.services.BookService;
 import org.apache.log4j.Logger;
@@ -50,9 +50,9 @@ public class AuthorUtil {
 
     static Logger log = Logger.getLogger(AuthorUtil.class.getName());
 
-    public List<AuthorDtoO> getAuthors(String auth) throws AuthorGeneralException {
+    public List<AuthorResponseDTO> getAuthors(String auth) throws AuthorGeneralException {
         List<Author> authors;
-        List<AuthorDtoO> authorDtoList;
+        List<AuthorResponseDTO> authorDtoList;
         try {
             String username = jwtUtil.getUserName(auth);
             if(username == null
@@ -72,7 +72,7 @@ public class AuthorUtil {
                 log.debug(message);
                 throw new EmptyAuthorListException();
             }
-            authorDtoList = mapListForm(authors,AuthorDtoO.class);
+            authorDtoList = mapListForm(authors, AuthorResponseDTO.class);
         } catch (IllegalStateException
                  | NullPointerException exception) {
             String message =AUTHOR_NOT_EXISTS +" \\ "+SERVER_ERROR;
@@ -106,9 +106,9 @@ public class AuthorUtil {
         return authors;
     }
 
-    public AuthorDtoO getAuthorByUsername(String author_username,String auth) throws AuthorGeneralException {
+    public AuthorResponseDTO getAuthorByUsername(String author_username, String auth) throws AuthorGeneralException {
         Author author;
-        AuthorDtoO authorDto;
+        AuthorResponseDTO authorDto;
         try {
             String username = jwtUtil.getUserName(auth);
             if(username == null
@@ -128,7 +128,7 @@ public class AuthorUtil {
                 log.debug(message);
                 throw new AuthorNotFoundException();
             }
-            authorDto = convertNewForm(author,AuthorDtoO.class);
+            authorDto = convertNewForm(author, AuthorResponseDTO.class);
             String message ="user ("+username+") get author ("+author.getUsername()+")";
             log.info(message);
         } catch (IllegalArgumentException ex) {
@@ -143,9 +143,9 @@ public class AuthorUtil {
         return authorDto;
     }
 
-    public AuthorDtoO getAuthorById(long id,String auth) throws AuthorGeneralException {
+    public AuthorResponseDTO getAuthorById(long id, String auth) throws AuthorGeneralException {
         Author author;
-        AuthorDtoO authorDto;
+        AuthorResponseDTO authorDto;
         try {
             String username = jwtUtil.getUserName(auth);
             if(username == null
@@ -165,7 +165,7 @@ public class AuthorUtil {
                 log.debug(message);
                 throw new AuthorNotFoundException();
             }
-            authorDto = convertNewForm(author,AuthorDtoO.class);
+            authorDto = convertNewForm(author, AuthorResponseDTO.class);
             String message ="user ("+username+") get author ("+author.getUsername()+")";
             log.info(message);
         } catch (IllegalArgumentException ex) {
@@ -180,9 +180,9 @@ public class AuthorUtil {
         return authorDto;
     }
 
-    public List<AuthorDtoO> getAuthorsByName(String name,String auth) throws AuthorGeneralException {
+    public List<AuthorResponseDTO> getAuthorsByName(String name, String auth) throws AuthorGeneralException {
         List<Author> authors;
-        List<AuthorDtoO> authorDtoList;
+        List<AuthorResponseDTO> authorDtoList;
             try {
                 String username = jwtUtil.getUserName(auth);
                 if(username == null
@@ -202,7 +202,7 @@ public class AuthorUtil {
                 log.debug(message);
                 throw new AuthorNotFoundException(message,HttpStatus.NO_CONTENT);
             }
-            authorDtoList = mapListForm(authors,AuthorDtoO.class);
+            authorDtoList = mapListForm(authors, AuthorResponseDTO.class);
                 String message ="user ("+username+") get authors with name ("+name+")";
                 log.info(message);
         } catch (IllegalArgumentException ex) {
@@ -218,9 +218,9 @@ public class AuthorUtil {
         return authorDtoList;
     }
 
-    public AuthorDtoO addAuthor(AuthorDto author, String auth) throws AuthorGeneralException{
+    public AuthorResponseDTO addAuthor(AuthorDto author, String auth) throws AuthorGeneralException{
         AuthorDto authorDto;
-        AuthorDtoO authorDtoO;
+        AuthorResponseDTO authorDtoO;
         try {
             String username = jwtUtil.getUserName(auth);
             if(username == null
@@ -280,7 +280,7 @@ public class AuthorUtil {
                 throw new AuthorNullException(message, HttpStatus.BAD_REQUEST);
             }
             authorDto = addAuthorWithOptionalBooks(author,username);
-            authorDtoO = convertNewForm(authorDto,AuthorDtoO.class);
+            authorDtoO = convertNewForm(authorDto, AuthorResponseDTO.class);
         } catch (IllegalArgumentException
                  | NullPointerException
                  | TransactionSystemException ex) {
@@ -390,8 +390,8 @@ public class AuthorUtil {
         return author;
     }
 
-    public AuthorDtoO deleteAuthor(long id, String auth) throws AuthorGeneralException {
-        AuthorDtoO authorDto;
+    public AuthorResponseDTO deleteAuthor(long id, String auth) throws AuthorGeneralException {
+        AuthorResponseDTO authorDto;
         try {
             String username = jwtUtil.getUserName(auth);
             if(username == null
@@ -423,7 +423,7 @@ public class AuthorUtil {
             String message ="user ("+username+") deleted this author ("+author.getUsername()+") and wrote it";
             log.info(message);
             //map author with book  have  customer , to  prevent recursive
-            authorDto = convertNewForm(author,AuthorDtoO.class);
+            authorDto = convertNewForm(author, AuthorResponseDTO.class);
         } catch (IllegalArgumentException ex) {
             String message =AUTHOR_ID_IS_NULL +" \\ "+SERVER_ERROR;
             log.error(message);
@@ -436,8 +436,8 @@ public class AuthorUtil {
         return authorDto;
     }
 
-    public AuthorDtoO deleteAuthor(String author_username, String auth) throws AuthorGeneralException {
-        AuthorDtoO authorDto;
+    public AuthorResponseDTO deleteAuthor(String author_username, String auth) throws AuthorGeneralException {
+        AuthorResponseDTO authorDto;
         try {
             String username = jwtUtil.getUserName(auth);
             if(username == null
@@ -469,7 +469,7 @@ public class AuthorUtil {
             String message ="user ("+username+") deleted this author ("+author.getUsername()+") and wrote it";
             log.info(message);
             //map author with book  have  customer , to  prevent recursive
-            authorDto = convertNewForm(author,AuthorDtoO.class);
+            authorDto = convertNewForm(author, AuthorResponseDTO.class);
         } catch (IllegalArgumentException ex) {
             String message =AUTHOR_USERNAME_IS_NULL +" \\ "+SERVER_ERROR;
             log.error(message);
@@ -482,8 +482,8 @@ public class AuthorUtil {
         return authorDto;
     }
 
-    public AuthorDtoO addAuthorBook(long id, String auth, BookDto bookDto) throws AuthorGeneralException {
-        AuthorDtoO authorDto;
+    public AuthorResponseDTO addAuthorBook(long id, String auth, BookDto bookDto) throws AuthorGeneralException {
+        AuthorResponseDTO authorDto;
         try {
             String username = jwtUtil.getUserName(auth);
             if(username == null
@@ -511,7 +511,7 @@ public class AuthorUtil {
                 throw new AuthorNotFoundException(message,HttpStatus.BAD_REQUEST);
             }
            Author authorI = addBookToAuthor(author,bookDto,username);
-            authorDto = convertNewForm(authorI,AuthorDtoO.class);
+            authorDto = convertNewForm(authorI, AuthorResponseDTO.class);
         } catch (IllegalArgumentException ex) {
             String message =AUTHOR_ID_IS_NULL +" \\ "+SERVER_ERROR;
             log.error(message);
@@ -524,8 +524,8 @@ public class AuthorUtil {
         return authorDto;
     }
 
-    public AuthorDtoO addAuthorBook(String author_username, String auth, BookDto bookDto) throws AuthorGeneralException {
-        AuthorDtoO authorDto;
+    public AuthorResponseDTO addAuthorBook(String author_username, String auth, BookDto bookDto) throws AuthorGeneralException {
+        AuthorResponseDTO authorDto;
         try {
             String username = jwtUtil.getUserName(auth);
             if(username == null
@@ -553,7 +553,7 @@ public class AuthorUtil {
                 throw new AuthorNotFoundException(message,HttpStatus.BAD_REQUEST);
             }
             Author authorI = addBookToAuthor(author,bookDto,username);
-            authorDto = convertNewForm(authorI,AuthorDtoO.class);
+            authorDto = convertNewForm(authorI, AuthorResponseDTO.class);
         } catch (IllegalArgumentException ex) {
             String message =AUTHOR_USERNAME_IS_NULL +" \\ "+SERVER_ERROR;
             log.error(message);
@@ -616,8 +616,8 @@ public class AuthorUtil {
         return author;
     }
 
-    public AuthorDtoO addAuthorBooks(long id, List<BookDto> bookDtoList,String auth) throws AuthorGeneralException {
-        AuthorDtoO authorDto;
+    public AuthorResponseDTO addAuthorBooks(long id, List<BookDto> bookDtoList, String auth) throws AuthorGeneralException {
+        AuthorResponseDTO authorDto;
         try {
             String username = jwtUtil.getUserName(auth);
             if(username == null
@@ -651,7 +651,7 @@ public class AuthorUtil {
                 log.debug(message);
                 throw new AuthorBookNull(message,HttpStatus.BAD_REQUEST);
             }
-            authorDto = convertNewForm(addAuthorBooks(author,books,username),AuthorDtoO.class);
+            authorDto = convertNewForm(addAuthorBooks(author,books,username), AuthorResponseDTO.class);
         } catch (IllegalArgumentException ex) {
             String message = AUTHOR_ID_IS_NULL +" \\ "+SERVER_ERROR;
             log.error(message);
@@ -665,8 +665,8 @@ public class AuthorUtil {
         return authorDto;
     }
 
-    public AuthorDtoO addAuthorBooks(String author_username, List<BookDto> bookDtoList,String auth) throws AuthorGeneralException {
-        AuthorDtoO authorDto;
+    public AuthorResponseDTO addAuthorBooks(String author_username, List<BookDto> bookDtoList, String auth) throws AuthorGeneralException {
+        AuthorResponseDTO authorDto;
         try {
             String username = jwtUtil.getUserName(auth);
             if(username == null
@@ -700,7 +700,7 @@ public class AuthorUtil {
                 log.debug(message);
                 throw new AuthorBookNull(message,HttpStatus.BAD_REQUEST);
             }
-            authorDto = convertNewForm(addAuthorBooks(author,books,username),AuthorDtoO.class);
+            authorDto = convertNewForm(addAuthorBooks(author,books,username), AuthorResponseDTO.class);
         } catch (IllegalArgumentException ex) {
             String message = AUTHOR_USERNAME_IS_NULL +" \\ "+SERVER_ERROR;
             log.error(message);
@@ -1054,9 +1054,9 @@ public class AuthorUtil {
         return bookDtoList;
     }
 
-    public AuthorDtoO updateAuthor(long id,AuthorDto authorI, String auth) throws AuthorGeneralException{
+    public AuthorResponseDTO updateAuthor(long id, AuthorDto authorI, String auth) throws AuthorGeneralException{
         AuthorDto authorDto;
-        AuthorDtoO authorDtoO;
+        AuthorResponseDTO authorResponseDTO;
         try {
             String username = jwtUtil.getUserName(auth);
             if(username == null
@@ -1131,7 +1131,7 @@ public class AuthorUtil {
                 }
             }
             authorDto = updateAuthorWithOptionalBooks(authorI,author,username,auth);
-            authorDtoO = convertNewForm(authorDto,AuthorDtoO.class);
+            authorResponseDTO = convertNewForm(authorDto, AuthorResponseDTO.class);
         } catch (IllegalArgumentException ex) {
             String message = AUTHOR_ID_IS_NULL +" \\ "+SERVER_ERROR;
             log.error(message);
@@ -1147,12 +1147,12 @@ public class AuthorUtil {
             log.error(message);
             throw new AuthorGeneralException(message,HttpStatus.INTERNAL_SERVER_ERROR);
         }
-        return authorDtoO;
+        return authorResponseDTO;
     }
 
-    public AuthorDtoO updateAuthor(String author_username,AuthorDto authorI, String auth) throws AuthorGeneralException{
+    public AuthorResponseDTO updateAuthor(String author_username, AuthorDto authorI, String auth) throws AuthorGeneralException{
         AuthorDto authorDto;
-        AuthorDtoO authorDtoO;
+        AuthorResponseDTO authorResponseDTO;
         try {
             String username = jwtUtil.getUserName(auth);
             if(username == null
@@ -1227,7 +1227,7 @@ public class AuthorUtil {
                 }
             }
             authorDto = updateAuthorWithOptionalBooks(authorI,author,username,auth);
-            authorDtoO = convertNewForm(authorDto,AuthorDtoO.class);
+            authorResponseDTO = convertNewForm(authorDto, AuthorResponseDTO.class);
         } catch (IllegalArgumentException ex) {
             String message = AUTHOR_USERNAME_IS_NULL +" \\ "+SERVER_ERROR;
             log.error(message);
@@ -1243,7 +1243,7 @@ public class AuthorUtil {
             log.error(message);
             throw new AuthorGeneralException(message,HttpStatus.INTERNAL_SERVER_ERROR);
         }
-        return authorDtoO;
+        return authorResponseDTO;
     }
 
     private AuthorDto updateAuthorWithOptionalBooks(AuthorDto authorDto,Author author,String username,String auth) {

@@ -2,7 +2,7 @@ package exp.exalt.bookshop.util;
 
 import exp.exalt.bookshop.dto.Mapper;
 import exp.exalt.bookshop.dto.author_dto.AuthorDto;
-import exp.exalt.bookshop.dto.author_dto.AuthorDtoO;
+import exp.exalt.bookshop.dto.author_dto.AuthorResponseDTO;
 import exp.exalt.bookshop.dto.book_dto.BookDto;
 import exp.exalt.bookshop.dto.book_dto.BookDtoO;
 import exp.exalt.bookshop.dto.customer_dto.CustomerDto;
@@ -13,7 +13,6 @@ import exp.exalt.bookshop.exceptions.book_exceptions.BookExistsException;
 import exp.exalt.bookshop.models.Author;
 import exp.exalt.bookshop.models.Book;
 import exp.exalt.bookshop.models.BookShopUser;
-import exp.exalt.bookshop.models.Customer;
 import exp.exalt.bookshop.services.AuthorService;
 import exp.exalt.bookshop.services.BookService;
 import org.junit.jupiter.api.BeforeEach;
@@ -27,8 +26,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 
@@ -56,7 +54,7 @@ public class AuthorUtilTest {
     Book book;
     BookDto bookDto;
 
-    AuthorDtoO authorDtoO;
+    AuthorResponseDTO authorResponseDTO;
 
     @BeforeEach
     public void init() {
@@ -74,11 +72,11 @@ public class AuthorUtilTest {
         authorS.setBooks(new ArrayList<>());
         authorS.addBook(book);
 
-        authorDtoO = new AuthorDtoO();
-        authorDtoO.setBooks(new ArrayList<>());
+        authorResponseDTO = new AuthorResponseDTO();
+        authorResponseDTO.setBooks(new ArrayList<>());
         List<BookDtoO> bookDtoOList = new ArrayList<>();
         bookDtoOList.add(new BookDtoO());
-        authorDtoO.setBooks(bookDtoOList);
+        authorResponseDTO.setBooks(bookDtoOList);
     }
 
   // add Author Book tests
@@ -150,8 +148,12 @@ public class AuthorUtilTest {
         when(bookService.getBookByIsbn(bookDto.getIsbn())).thenReturn(null);
         when(mapper.convertForm(bookDto,Book.class)).thenReturn(book);
         when(authorService.addAuthorOrUpdate(author)).thenReturn(authorS);
-        when(mapper.convertForm(authorS,AuthorDtoO.class)).thenReturn(authorDtoO);
-        assertEquals(authorUtil.addAuthorBook(240,"auth test",bookDto).getBooks().size(),1);
+        when(mapper.convertForm(authorS, AuthorResponseDTO.class)).thenReturn(authorResponseDTO);
+        AuthorResponseDTO lAuthor =  authorUtil.addAuthorBook(240,"auth test",bookDto);
+        assertNotNull(lAuthor);
+        assertNotNull(lAuthor.getBooks());
+        assertFalse(lAuthor.getBooks().isEmpty());
+        assertEquals(1, lAuthor.getBooks().size());
     }
     
 }

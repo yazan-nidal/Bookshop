@@ -2,7 +2,7 @@ package exp.exalt.bookshop.dto.book_dto;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonInclude;
-import exp.exalt.bookshop.dto.author_dto.AuthorDtoO;
+import exp.exalt.bookshop.dto.author_dto.AuthorResponseDTO;
 import exp.exalt.bookshop.dto.customer_dto.CustomerDtoO;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -26,7 +26,7 @@ public class BookDtoO implements Serializable {
     @JsonInclude(JsonInclude.Include.CUSTOM)
     @Nullable
     @JsonBackReference("author-book")
-    private AuthorDtoO author;
+    private AuthorResponseDTO author;
     @JsonInclude(JsonInclude.Include.CUSTOM)
     @Nullable
     @JsonBackReference("customer-book")

@@ -2,7 +2,6 @@ package exp.exalt.bookshop.dto.author_dto;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
-import exp.exalt.bookshop.dto.book_dto.BookDto;
 import exp.exalt.bookshop.dto.book_dto.BookDtoO;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -18,7 +17,7 @@ import java.util.List;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-public class AuthorDtoO implements Serializable {
+public class AuthorResponseDTO implements Serializable {
     @JsonInclude(JsonInclude.Include.CUSTOM)
     @Nullable
     private long id = Integer.MIN_VALUE;
