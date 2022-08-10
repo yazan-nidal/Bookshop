@@ -21,7 +21,7 @@ import java.util.function.Predicate;
 @Table(name = "Authors")
 public class Author extends BookShopUser {
     @JsonManagedReference("author-book")
-    @OneToMany(fetch = FetchType.EAGER,mappedBy ="author", cascade = {CascadeType.REMOVE} , orphanRemoval = true)
+    @OneToMany(fetch = FetchType.EAGER,mappedBy ="author", cascade = {CascadeType.MERGE,CascadeType.PERSIST,CascadeType.REMOVE} , orphanRemoval = true)
     private List<Book> books;
     public void addBook(Book book) {
         this.books.add(book);

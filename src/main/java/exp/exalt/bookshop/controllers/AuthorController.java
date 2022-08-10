@@ -61,11 +61,6 @@ public class AuthorController {
 
     @PostMapping(value = "/{id}/books")
     public ResponseEntity<Object> addBook(@PathVariable(value = "id") long id, @RequestHeader(HttpHeaders.AUTHORIZATION) String auth, @RequestBody BookDto book) {
-
-        //AuthorDto a = authorUtil.getAuthorById(id,auth);
-      //  book.setAuthor(a);
-        //Book b = bookRepository.save(mapper.convertForm(book, Book.class));
-       // new ResponseEntity<>(authorUtil.addAuthorBook(id,auth,book), HttpStatus.CREATED);
         return  new ResponseEntity<>(authorUtil.addAuthorBook(id,auth,book), HttpStatus.CREATED);
     }
 
@@ -122,6 +117,26 @@ public class AuthorController {
     @PutMapping(value = "/author/{username}")
     public ResponseEntity<Object> updateAuthor(@PathVariable(value = "username") String username, @RequestBody AuthorDto author, @RequestHeader(HttpHeaders.AUTHORIZATION) String auth) {
         return  new ResponseEntity<>( authorUtil.updateAuthor(username,author, auth), HttpStatus.OK);
+    }
+
+    @PutMapping(value = "/{id}/books/{isbn}")
+    public ResponseEntity<Object> updateAuthorBookByIsbn(@PathVariable(value = "id") long id, @PathVariable(value = "isbn") long  isbn,@RequestBody BookDto bookDto, @RequestHeader(HttpHeaders.AUTHORIZATION) String auth) {
+        return  new ResponseEntity<>(authorUtil.updateAuthorBookByIsbn(id,isbn,bookDto,auth), HttpStatus.OK);
+    }
+
+    @PutMapping(value = "/author/{username}/books/{isbn}")
+    public ResponseEntity<Object> updateAuthorBookByIsbn(@PathVariable(value = "username") String username, @PathVariable(value = "isbn") long  isbn,@RequestBody BookDto bookDto, @RequestHeader(HttpHeaders.AUTHORIZATION) String auth) {
+        return  new ResponseEntity<>(authorUtil.updateAuthorBookByIsbn(username,isbn,bookDto,auth), HttpStatus.OK);
+    }
+
+    @PutMapping(value = "/author/{username}/books/book/{book_id}")
+    public ResponseEntity<Object> updateAuthorBookById(@PathVariable(value = "username") String username, @PathVariable(value = "book_id") long  book_id,@RequestBody BookDto bookDto, @RequestHeader(HttpHeaders.AUTHORIZATION) String auth) {
+        return  new ResponseEntity<>(authorUtil.updateAuthorBookById(username,book_id,bookDto,auth), HttpStatus.OK);
+    }
+
+    @PutMapping(value = "/{id}/books/book/{book_id}")
+    public ResponseEntity<Object> updateAuthorBookById(@PathVariable(value = "id") long id, @PathVariable(value = "book_id") long  book_id,@RequestBody BookDto bookDto, @RequestHeader(HttpHeaders.AUTHORIZATION) String auth) {
+        return  new ResponseEntity<>(authorUtil.updateAuthorBookById(id,book_id,bookDto,auth), HttpStatus.OK);
     }
 
     @GetMapping(value = "/{id}/books/{isbn}")

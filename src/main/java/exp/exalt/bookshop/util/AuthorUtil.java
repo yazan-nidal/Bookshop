@@ -1,5 +1,7 @@
 package exp.exalt.bookshop.util;
 
+import exp.exalt.bookshop.dto.author_dto.AuthorDtoO;
+import exp.exalt.bookshop.dto.book_dto.BookDtoO;
 import exp.exalt.bookshop.services.BookService;
 import org.apache.log4j.Logger;
 import exp.exalt.bookshop.dto.author_dto.AuthorDto;
@@ -48,59 +50,33 @@ public class AuthorUtil {
 
     static Logger log = Logger.getLogger(AuthorUtil.class.getName());
 
-    public List<AuthorDto> getAuthors(String auth) throws AuthorGeneralException {
+    public List<AuthorDtoO> getAuthors(String auth) throws AuthorGeneralException {
         List<Author> authors;
-        List<AuthorDto> authorDtoList;
-        String username_log = "";
+        List<AuthorDtoO> authorDtoList;
         try {
             String username = jwtUtil.getUserName(auth);
-            username_log = username;
             if(username == null
                     || username.isEmpty()) {
                 String message =BAD_CREDENTIAL;
-                log.warn(String.format(
-                        LOG_INSERT
-                        ,auth
-                        ,DATE_FORMAT.format(new Date())
-                        ,this.getClass().getName()
-                        ,"WARN"
-                        ,message));
+                log.debug(message);
                 throw new AuthorGeneralException(BAD_CREDENTIAL,HttpStatus.BAD_REQUEST);
             }
             if(!bookShopUserUtil.getUserByUsername(username).isEnabled()) {
                 String message =USER_DEACTIVATED;
-                log.warn(String.format(
-                        LOG_INSERT
-                        ,username_log
-                        ,DATE_FORMAT.format(new Date())
-                        ,this.getClass().getName()
-                        ,"WARN"
-                        ,message));
+                log.debug(message);
                 throw new AuthorGeneralException(message,HttpStatus.BAD_REQUEST);
             }
-            authors = getALLAuthorsFromAuthorService(username_log);
+            authors = getALLAuthorsFromAuthorService(username);
             if (authors.isEmpty()) {
                 String message =AUTHOR_NOT_EXISTS;
-                log.warn(String.format(
-                        LOG_INSERT
-                        ,username_log
-                        ,DATE_FORMAT.format(new Date())
-                        ,this.getClass().getName()
-                        ,"WARN"
-                        ,message));
+                log.debug(message);
                 throw new EmptyAuthorListException();
             }
-            authorDtoList = mapListForm(authors,AuthorDto.class);
+            authorDtoList = mapListForm(authors,AuthorDtoO.class);
         } catch (IllegalStateException
                  | NullPointerException exception) {
             String message =AUTHOR_NOT_EXISTS +" \\ "+SERVER_ERROR;
-            log.error(String.format(
-                    LOG_INSERT
-                    ,username_log
-                    ,DATE_FORMAT.format(new Date())
-                    ,this.getClass().getName()
-                    ,"ERROR"
-                    ,message));
+            log.error(message);
             throw new AuthorGeneralException(message);
         }
         return authorDtoList;
@@ -113,335 +89,186 @@ public class AuthorUtil {
              authorIterable = authorService.getAuthors();
              authors = new ArrayList<>();
              authorIterable.forEach(authors::add);
+             String message = "user ("+username_log+") get all authors";
+             log.info(message);
         } catch (UnsupportedOperationException
                 | ClassCastException
                 | IllegalArgumentException ex) {
             String message ="it' have problem in get Authors (prepare list operation):"
                     + FOR_EACH_ACTION + CONTACT_ADMIN;
-            log.error(String.format(
-                    LOG_INSERT
-                    ,username_log
-                    ,DATE_FORMAT.format(new Date())
-                    ,this.getClass().getName()
-                    ,"ERROR"
-                    ,message));
-                    throw new AuthorGeneralException(message);
+            log.error(message);
+            throw new AuthorGeneralException(message);
         } catch (NullPointerException ex) {
             String message =SERVER_ERROR;
-            log.error(String.format(
-                    LOG_INSERT
-                    ,username_log
-                    ,DATE_FORMAT.format(new Date())
-                    ,this.getClass().getName()
-                    ,"ERROR"
-                    ,message));
+            log.error(message);
             throw new AuthorGeneralException(message);
         }
         return authors;
     }
 
-    public AuthorDto getAuthorByUsername(String author_username,String auth) throws AuthorGeneralException {
+    public AuthorDtoO getAuthorByUsername(String author_username,String auth) throws AuthorGeneralException {
         Author author;
-        AuthorDto authorDto;
-        String username_log = "";
+        AuthorDtoO authorDto;
         try {
             String username = jwtUtil.getUserName(auth);
-            username_log = username;
             if(username == null
                     || username.isEmpty()) {
                 String message =BAD_CREDENTIAL;
-                log.warn(String.format(
-                        LOG_INSERT
-                        ,auth
-                        ,DATE_FORMAT.format(new Date())
-                        ,this.getClass().getName()
-                        ,"WARN"
-                        ,message));
+                log.debug(message);
                 throw new AuthorGeneralException(BAD_CREDENTIAL,HttpStatus.BAD_REQUEST);
             }
             if(!bookShopUserUtil.getUserByUsername(username).isEnabled()) {
                 String message =USER_DEACTIVATED;
-                log.warn(String.format(
-                        LOG_INSERT
-                        ,username_log
-                        ,DATE_FORMAT.format(new Date())
-                        ,this.getClass().getName()
-                        ,"WARN"
-                        ,message));
+                log.debug(message);
                 throw new AuthorGeneralException(message,HttpStatus.BAD_REQUEST);
             }
             author = authorService.getAuthorByUsername(author_username);
             if(author == null){
                 String message =AUTHOR_NOT_EXISTS;
-                log.warn(String.format(
-                        LOG_INSERT
-                        ,username_log
-                        ,DATE_FORMAT.format(new Date())
-                        ,this.getClass().getName()
-                        ,"WARN"
-                        ,message));
+                log.debug(message);
                 throw new AuthorNotFoundException();
             }
-            authorDto = convertNewForm(author,AuthorDto.class);
+            authorDto = convertNewForm(author,AuthorDtoO.class);
+            String message ="user ("+username+") get author ("+author.getUsername()+")";
+            log.info(message);
         } catch (IllegalArgumentException ex) {
             String message =AUTHOR_USERNAME_IS_NULL +" \\ "+SERVER_ERROR;
-            log.error(String.format(
-                    LOG_INSERT
-                    ,username_log
-                    ,DATE_FORMAT.format(new Date())
-                    ,this.getClass().getName()
-                    ,"ERROR"
-                    ,message));
+            log.error(message);
             throw new AuthorGeneralException(message);
         } catch (NullPointerException ex) {
             String message =SERVER_ERROR;
-            log.error(String.format(
-                    LOG_INSERT
-                    ,username_log
-                    ,DATE_FORMAT.format(new Date())
-                    ,this.getClass().getName()
-                    ,"ERROR"
-                    ,message));
+            log.error(message);
             throw new AuthorNotFoundException(message);
         }
         return authorDto;
     }
 
-    public AuthorDto getAuthorById(long id,String auth) throws AuthorGeneralException {
+    public AuthorDtoO getAuthorById(long id,String auth) throws AuthorGeneralException {
         Author author;
-        AuthorDto authorDto;
-        String username_log = "";
+        AuthorDtoO authorDto;
         try {
             String username = jwtUtil.getUserName(auth);
-            username_log = username;
             if(username == null
                     || username.isEmpty()) {
                 String message =BAD_CREDENTIAL;
-                log.warn(String.format(
-                        LOG_INSERT
-                        ,auth
-                        ,DATE_FORMAT.format(new Date())
-                        ,this.getClass().getName()
-                        ,"WARN"
-                        ,message));
+                log.debug(message);
                 throw new AuthorGeneralException(BAD_CREDENTIAL,HttpStatus.BAD_REQUEST);
             }
             if(!bookShopUserUtil.getUserByUsername(username).isEnabled()) {
                 String message =USER_DEACTIVATED;
-                log.warn(String.format(
-                        LOG_INSERT
-                        ,username_log
-                        ,DATE_FORMAT.format(new Date())
-                        ,this.getClass().getName()
-                        ,"WARN"
-                        ,message));
+                log.debug(message);
                 throw new AuthorGeneralException(message,HttpStatus.BAD_REQUEST);
             }
             author = authorService.getAuthorById(id);
             if(author == null){
                 String message =AUTHOR_NOT_EXISTS;
-                log.warn(String.format(
-                        LOG_INSERT
-                        ,username_log
-                        ,DATE_FORMAT.format(new Date())
-                        ,this.getClass().getName()
-                        ,"WARN"
-                        ,message));
+                log.debug(message);
                 throw new AuthorNotFoundException();
             }
-            authorDto = convertNewForm(author,AuthorDto.class);
+            authorDto = convertNewForm(author,AuthorDtoO.class);
+            String message ="user ("+username+") get author ("+author.getUsername()+")";
+            log.info(message);
         } catch (IllegalArgumentException ex) {
             String message =AUTHOR_ID_IS_NULL +" \\ "+SERVER_ERROR;
-            log.error(String.format(
-                    LOG_INSERT
-                    ,username_log
-                    ,DATE_FORMAT.format(new Date())
-                    ,this.getClass().getName()
-                    ,"ERROR"
-                    ,message));
+            log.error(message);
             throw new AuthorGeneralException(message);
         } catch (NullPointerException ex) {
             String message =SERVER_ERROR;
-            log.error(String.format(
-                    LOG_INSERT
-                    ,username_log
-                    ,DATE_FORMAT.format(new Date())
-                    ,this.getClass().getName()
-                    ,"ERROR"
-                    ,message));
+            log.error(message);
             throw new AuthorNotFoundException(message);
         }
         return authorDto;
     }
 
-    public List<AuthorDto> getAuthorsByName(String name,String auth) throws AuthorGeneralException {
+    public List<AuthorDtoO> getAuthorsByName(String name,String auth) throws AuthorGeneralException {
         List<Author> authors;
-        List<AuthorDto> authorDtoList;
-            String username_log = "";
+        List<AuthorDtoO> authorDtoList;
             try {
                 String username = jwtUtil.getUserName(auth);
-                username_log = username;
                 if(username == null
                         || username.isEmpty()) {
                     String message =BAD_CREDENTIAL;
-                    log.warn(String.format(
-                            LOG_INSERT
-                            ,auth
-                            ,DATE_FORMAT.format(new Date())
-                            ,this.getClass().getName()
-                            ,"WARN"
-                            ,message));
+                    log.debug(message);
                     throw new AuthorGeneralException(BAD_CREDENTIAL,HttpStatus.BAD_REQUEST);
                 }
                 if(!bookShopUserUtil.getUserByUsername(username).isEnabled()) {
                     String message =USER_DEACTIVATED;
-                    log.warn(String.format(
-                            LOG_INSERT
-                            ,username_log
-                            ,DATE_FORMAT.format(new Date())
-                            ,this.getClass().getName()
-                            ,"WARN"
-                            ,message));
+                    log.debug(message);
                     throw new AuthorGeneralException(message,HttpStatus.BAD_REQUEST);
                 }
             authors = authorService.getAuthorsByName(name);
             if(authors.isEmpty()) {
                 String message =AUTHOR_NOT_EXISTS + " \\ "+BAD_REQUEST;
-                log.warn(String.format(
-                        LOG_INSERT
-                        ,username_log
-                        ,DATE_FORMAT.format(new Date())
-                        ,this.getClass().getName()
-                        ,"WARN"
-                        ,message));
+                log.debug(message);
                 throw new AuthorNotFoundException(message,HttpStatus.NO_CONTENT);
             }
-            authorDtoList = mapListForm(authors,AuthorDto.class);
+            authorDtoList = mapListForm(authors,AuthorDtoO.class);
+                String message ="user ("+username+") get authors with name ("+name+")";
+                log.info(message);
         } catch (IllegalArgumentException ex) {
                 String message ="Authors Name: " + NAME_IS_NULL+" \\ "+SERVER_ERROR;
-                log.error(String.format(
-                        LOG_INSERT
-                        ,username_log
-                        ,DATE_FORMAT.format(new Date())
-                        ,this.getClass().getName()
-                        ,"ERROR"
-                        ,message));
+                log.error(message);
                 throw new AuthorNullException(message,HttpStatus.INTERNAL_SERVER_ERROR);
         } catch (IllegalStateException
                  | NullPointerException exception) {
                 String message =SERVER_ERROR;
-                log.error(String.format(
-                        LOG_INSERT
-                        ,username_log
-                        ,DATE_FORMAT.format(new Date())
-                        ,this.getClass().getName()
-                        ,"ERROR"
-                        ,message));
+                log.error(message);
             throw new AuthorNotFoundException(message,HttpStatus.INTERNAL_SERVER_ERROR);
         }
         return authorDtoList;
     }
 
-    public AuthorDto addAuthor(AuthorDto author, String auth) throws AuthorGeneralException{
+    public AuthorDtoO addAuthor(AuthorDto author, String auth) throws AuthorGeneralException{
         AuthorDto authorDto;
-        String username_log = "";
+        AuthorDtoO authorDtoO;
         try {
             String username = jwtUtil.getUserName(auth);
-            username_log = username;
             if(username == null
                     || username.isEmpty()) {
                 String message =BAD_CREDENTIAL;
-                log.warn(String.format(
-                        LOG_INSERT
-                        ,auth
-                        ,DATE_FORMAT.format(new Date())
-                        ,this.getClass().getName()
-                        ,"WARN"
-                        ,message));
+                log.debug(message);
                 throw new AuthorGeneralException(BAD_CREDENTIAL,HttpStatus.BAD_REQUEST);
             }
             if(!bookShopUserUtil.getUserByUsername(username).isEnabled()) {
                 String message =USER_DEACTIVATED;
-                log.warn(String.format(
-                        LOG_INSERT
-                        ,username_log
-                        ,DATE_FORMAT.format(new Date())
-                        ,this.getClass().getName()
-                        ,"WARN"
-                        ,message));
+                log.debug(message);
                 throw new AuthorGeneralException(message,HttpStatus.BAD_REQUEST);
             }
             if(bookShopUserUtil.getUserRole(username) != RoleID.ADMIN.getRole()) {
                 String message =UNAUTHORIZED_OPERATION;
-                log.warn(String.format(
-                        LOG_INSERT
-                        ,username_log
-                        ,DATE_FORMAT.format(new Date())
-                        ,this.getClass().getName()
-                        ,"WARN"
-                        ,message));
+                log.debug(message);
                 throw new AuthorGeneralException(message,HttpStatus.BAD_REQUEST);
             }
             if(author == null
                     || author.getUsername() == null
                     || author.getUsername().isEmpty()) {
                 String message =AUTHOR_NULL_BAD_REQUEST;
-                log.warn(String.format(
-                        LOG_INSERT
-                        ,username_log
-                        ,DATE_FORMAT.format(new Date())
-                        ,this.getClass().getName()
-                        ,"WARN"
-                        ,message));
+                log.debug(message);
                 throw new AuthorNullException(message, HttpStatus.BAD_REQUEST);
             }
             if(author.getId() != Integer.MIN_VALUE){
                 String message =ASSIGN_ID_ERROR;
-                log.warn(String.format(
-                        LOG_INSERT
-                        ,username_log
-                        ,DATE_FORMAT.format(new Date())
-                        ,this.getClass().getName()
-                        ,"WARN"
-                        ,message));
+                log.debug(message);
                 throw new AuthorGeneralException(message,HttpStatus.BAD_REQUEST);
             }
             if(author.getUsername() == null
                     || author.getUsername().isEmpty()
                     || author.getUsername().length() < USERNAME_LENGTH) {
                 String message =USERNAME_LENGTH_Problem;
-                log.warn(String.format(
-                        LOG_INSERT
-                        ,username_log
-                        ,DATE_FORMAT.format(new Date())
-                        ,this.getClass().getName()
-                        ,"WARN"
-                        ,message));
+                log.debug(message);
                 throw new AuthorGeneralException(message, HttpStatus.BAD_REQUEST);
             }
             if(bookShopUserUtil.getUserByUsername(author.getUsername()) != null) {
                 String message =USERNAME_CONFLICT;
-                log.warn(String.format(
-                        LOG_INSERT
-                        ,username_log
-                        ,DATE_FORMAT.format(new Date())
-                        ,this.getClass().getName()
-                        ,"WARN"
-                        ,message));
+                log.debug(message);
                 throw new AuthorExistsException(message);
             }
             if(author.getPassword() == null
                     || author.getPassword().isEmpty()
                     || author.getPassword().length() < PASSWORD_LENGTH) {
                     String message = PASSWORD_LENGTH_Problem + " \\ " + BAD_REQUEST;
-                    log.warn(String.format(
-                            LOG_INSERT
-                            ,username_log
-                            ,DATE_FORMAT.format(new Date())
-                            ,this.getClass().getName()
-                            ,"WARN"
-                            ,message));
-                    throw new AuthorGeneralException(message,HttpStatus.BAD_REQUEST);
+                log.debug(message);
+                throw new AuthorGeneralException(message,HttpStatus.BAD_REQUEST);
             }
             if(author.getRole() == Integer.MIN_VALUE){
                 author.setRole(RoleID.AUTHOR.getRole());
@@ -449,42 +276,24 @@ public class AuthorUtil {
             if(author.getRole() != RoleID.AUTHOR.getRole()
                     && author.getRole() != RoleID.ADMIN.getRole()) {
                 String message =AUTHOR_ROLE_BAD_REQUEST;
-                log.warn(String.format(
-                        LOG_INSERT
-                        ,username_log
-                        ,DATE_FORMAT.format(new Date())
-                        ,this.getClass().getName()
-                        ,"WARN"
-                        ,message));
+                log.debug(message);
                 throw new AuthorNullException(message, HttpStatus.BAD_REQUEST);
             }
-            authorDto = addAuthorWithOptionalBooks(author,username_log);
+            authorDto = addAuthorWithOptionalBooks(author,username);
+            authorDtoO = convertNewForm(authorDto,AuthorDtoO.class);
         } catch (IllegalArgumentException
                  | NullPointerException
                  | TransactionSystemException ex) {
             String message =AUTHOR_NULL+" \\ "+SERVER_ERROR;
-            log.error(String.format(
-                    LOG_INSERT
-                    ,username_log
-                    ,DATE_FORMAT.format(new Date())
-                    ,this.getClass().getName()
-                    ,"ERROR"
-                    ,message));
+            log.error(message);
             throw new AuthorNullException(message,HttpStatus.INTERNAL_SERVER_ERROR);
         } catch (EntityExistsException
                  | DataIntegrityViolationException ex) {
             String message = "JPA: " + USER_CONFLICT+" \\ "+SERVER_ERROR;
-            log.error(String.format(
-                    LOG_INSERT
-                    ,username_log
-                    ,DATE_FORMAT.format(new Date())
-                    ,this.getClass().getName()
-                    ,"ERROR"
-                    ,message));
+            log.error(message);
             throw new AuthorGeneralException(message,HttpStatus.INTERNAL_SERVER_ERROR);
         }
-        authorDto.setPassword(null);
-        return authorDto;
+        return authorDtoO;
     }
 
     private AuthorDto addAuthorWithOptionalBooks(AuthorDto author,String username_log) {
@@ -494,27 +303,16 @@ public class AuthorUtil {
             List<Book> books = authorI.getBooks();
             authorI.setBooks(new ArrayList<>());
             authorI = authorService.addAuthorOrUpdate(authorI);
-            log.info(String.format(
-                    LOG_INSERT
-                    ,username_log
-                    ,DATE_FORMAT.format(new Date())
-                    ,this.getClass().getName()
-                    ,"INFO"
-                    ,"A new author (" + author.getUsername() +") has been added by this admin (" + username_log+")"));
+            log.info("A new author (" + author.getUsername() +") has been added by this admin (" + username_log+")");
             authorDto = convertNewForm(authorI,AuthorDto.class);
             if(books != null
                     && !books.isEmpty()) {
+                log.debug("add author books");
                 authorDto = convertNewForm(addAuthorBooks(authorI,books,username_log),AuthorDto.class);
             }
         } catch (IllegalArgumentException ex) {
             String message = AUTHOR_NULL+" \\ "+SERVER_ERROR;
-            log.error(String.format(
-                    LOG_INSERT
-                    ,username_log
-                    ,DATE_FORMAT.format(new Date())
-                    ,this.getClass().getName()
-                    ,"ERROR"
-                    ,message));
+            log.error(message);
             throw new AuthorNullException(message,HttpStatus.INTERNAL_SERVER_ERROR);
         }
         return authorDto;
@@ -559,13 +357,7 @@ public class AuthorUtil {
             String message = author.getUsername().equals(username_log)?
                     "admin (" + username_log +") added  books[ "+author_books+"] of  author  when  add  the author (" + author.getUsername() +")":
                     "author (" + author.getUsername()+") add  new  books[ "+author_books+"]";
-            log.info(String.format(
-                    LOG_INSERT
-                    ,username_log
-                    ,DATE_FORMAT.format(new Date())
-                    ,this.getClass().getName()
-                    ,"INFO"
-                    ,message));
+            log.info(message);
             author = authorService.getAuthorByUsername(author.getUsername());
             if(exists || force_rent){
                 message = "";
@@ -575,13 +367,7 @@ public class AuthorUtil {
                 if(exists) {
                    message+= BOOK_EXISTS_BAD_REQUEST+" : [ "+books_exists+" ] but the other books were added";
                 }
-                log.warn(String.format(
-                        LOG_INSERT
-                        ,username_log
-                        ,DATE_FORMAT.format(new Date())
-                        ,this.getClass().getName()
-                        ,"WARN"
-                        ,message));
+                log.debug(message);
                 throw new BookExistsException(message);
             }
         } catch (NullPointerException
@@ -589,380 +375,194 @@ public class AuthorUtil {
                  | IllegalArgumentException ex) {
             // AUTHOR_NOT_FOUND OR AUTHOR_BOOK_NULL
             String message = AUTHOR_NULL+" \\ "+SERVER_ERROR;
-            log.error(String.format(
-                    LOG_INSERT
-                    ,username_log
-                    ,DATE_FORMAT.format(new Date())
-                    ,this.getClass().getName()
-                    ,"ERROR"
-                    ,message));
+            log.error(message);
             throw new AuthorNullException(message,HttpStatus.INTERNAL_SERVER_ERROR);
         } catch (ClassCastException
                  | UnsupportedOperationException ex){
             String message = BOOK_LIST_PROBLEM+" \\ "+SERVER_ERROR;
-            log.error(String.format(
-                    LOG_INSERT
-                    ,username_log
-                    ,DATE_FORMAT.format(new Date())
-                    ,this.getClass().getName()
-                    ,"ERROR"
-                    ,message));
+            log.error(message);
             throw new AuthorGeneralException(message);
         } catch (DataIntegrityViolationException ex) {
             String message = BOOK_EXISTS+" \\ "+SERVER_ERROR;
-            log.error(String.format(
-                    LOG_INSERT
-                    ,username_log
-                    ,DATE_FORMAT.format(new Date())
-                    ,this.getClass().getName()
-                    ,"ERROR"
-                    ,message));
+            log.error(message);
             throw new BookExistsException(message,HttpStatus.INTERNAL_SERVER_ERROR);
         }
         return author;
     }
 
-    public AuthorDto deleteAuthor(long id, String auth) throws AuthorGeneralException {
-        AuthorDto authorDto;
-        String username_log = "";
+    public AuthorDtoO deleteAuthor(long id, String auth) throws AuthorGeneralException {
+        AuthorDtoO authorDto;
         try {
             String username = jwtUtil.getUserName(auth);
-            username_log = username;
             if(username == null
                     || username.isEmpty()) {
                 String message =BAD_CREDENTIAL;
-                log.warn(String.format(
-                        LOG_INSERT
-                        ,auth
-                        ,DATE_FORMAT.format(new Date())
-                        ,this.getClass().getName()
-                        ,"WARN"
-                        ,message));
+                log.debug(message);
                 throw new AuthorGeneralException(BAD_CREDENTIAL,HttpStatus.BAD_REQUEST);
             }
             if(!bookShopUserUtil.getUserByUsername(username).isEnabled()) {
                 String message =USER_DEACTIVATED;
-                log.warn(String.format(
-                        LOG_INSERT
-                        ,username_log
-                        ,DATE_FORMAT.format(new Date())
-                        ,this.getClass().getName()
-                        ,"WARN"
-                        ,message));
+                log.debug(message);
                 throw new AuthorGeneralException(message,HttpStatus.BAD_REQUEST);
             }
            if(bookShopUserUtil.getUserRole(username) != RoleID.ADMIN.getRole()
                     && (bookShopUserUtil.getUserRole(username) != RoleID.AUTHOR.getRole()
                     || bookShopUserUtil.getUserByUsername(username).getId() != id) ) {
                String message =UNAUTHORIZED_OPERATION;
-               log.warn(String.format(
-                       LOG_INSERT
-                       ,username_log
-                       ,DATE_FORMAT.format(new Date())
-                       ,this.getClass().getName()
-                       ,"WARN"
-                       ,message));
+               log.debug(message);
                 throw new AuthorGeneralException(message,HttpStatus.BAD_REQUEST);
             }
             Author author = authorService.getAuthorById(id);
             if(author == null){
                 String message =AUTHOR_NOT_EXISTS;
-                log.warn(String.format(
-                        LOG_INSERT
-                        ,username_log
-                        ,DATE_FORMAT.format(new Date())
-                        ,this.getClass().getName()
-                        ,"WARN"
-                        ,message));
+                log.debug(message);
                 throw new AuthorNotFoundException();
             }
             this.deleteAuthorBooks(author,username);
             authorService.deleteAuthor(id);
-            String message ="user ("+username_log+") deleted this author ("+author.getUsername()+") and wrote it";
-            log.info(String.format(
-                    LOG_INSERT
-                    ,username_log
-                    ,DATE_FORMAT.format(new Date())
-                    ,this.getClass().getName()
-                    ,"INFO"
-                    ,message));
+            String message ="user ("+username+") deleted this author ("+author.getUsername()+") and wrote it";
+            log.info(message);
             //map author with book  have  customer , to  prevent recursive
-            authorDto = convertNewForm(author,AuthorDto.class);
+            authorDto = convertNewForm(author,AuthorDtoO.class);
         } catch (IllegalArgumentException ex) {
             String message =AUTHOR_ID_IS_NULL +" \\ "+SERVER_ERROR;
-            log.error(String.format(
-                    LOG_INSERT
-                    ,username_log
-                    ,DATE_FORMAT.format(new Date())
-                    ,this.getClass().getName()
-                    ,"ERROR"
-                    ,message));
+            log.error(message);
             throw new AuthorGeneralException(message);
         } catch (NullPointerException ex) {
             String message =SERVER_ERROR;
-            log.error(String.format(
-                    LOG_INSERT
-                    ,username_log
-                    ,DATE_FORMAT.format(new Date())
-                    ,this.getClass().getName()
-                    ,"ERROR"
-                    ,message));
+            log.error(message);
             throw new AuthorNotFoundException(message);
         }
-        authorDto.setPassword(null);
         return authorDto;
     }
 
-    public AuthorDto deleteAuthor(String author_username, String auth) throws AuthorGeneralException {
-        AuthorDto authorDto;
-        String username_log = "";
+    public AuthorDtoO deleteAuthor(String author_username, String auth) throws AuthorGeneralException {
+        AuthorDtoO authorDto;
         try {
             String username = jwtUtil.getUserName(auth);
-            username_log = username;
             if(username == null
                     || username.isEmpty()) {
                 String message =BAD_CREDENTIAL;
-                log.warn(String.format(
-                        LOG_INSERT
-                        ,auth
-                        ,DATE_FORMAT.format(new Date())
-                        ,this.getClass().getName()
-                        ,"WARN"
-                        ,message));
+                log.debug(message);
                 throw new AuthorGeneralException(BAD_CREDENTIAL,HttpStatus.BAD_REQUEST);
             }
             if(!bookShopUserUtil.getUserByUsername(username).isEnabled()) {
                 String message =USER_DEACTIVATED;
-                log.warn(String.format(
-                        LOG_INSERT
-                        ,username_log
-                        ,DATE_FORMAT.format(new Date())
-                        ,this.getClass().getName()
-                        ,"WARN"
-                        ,message));
+                log.debug(message);
                 throw new AuthorGeneralException(message,HttpStatus.BAD_REQUEST);
             }
             if(bookShopUserUtil.getUserRole(username) != RoleID.ADMIN.getRole()
                     && (bookShopUserUtil.getUserRole(username) != RoleID.AUTHOR.getRole()
                     || !bookShopUserUtil.getUserByUsername(username).getUsername().equals(author_username)) ) {
                 String message =UNAUTHORIZED_OPERATION;
-                log.warn(String.format(
-                        LOG_INSERT
-                        ,username_log
-                        ,DATE_FORMAT.format(new Date())
-                        ,this.getClass().getName()
-                        ,"WARN"
-                        ,message));
+                log.debug(message);
                 throw new AuthorGeneralException(message,HttpStatus.BAD_REQUEST);
             }
             Author author = authorService.getAuthorByUsername(author_username);
             if(author == null){
                 String message =AUTHOR_NOT_EXISTS;
-                log.warn(String.format(
-                        LOG_INSERT
-                        ,username_log
-                        ,DATE_FORMAT.format(new Date())
-                        ,this.getClass().getName()
-                        ,"WARN"
-                        ,message));
+                log.debug(message);
                 throw new AuthorNotFoundException();
             }
             this.deleteAuthorBooks(author,username);
             authorService.deleteAuthor(author_username);
-            String message ="user ("+username_log+") deleted this author ("+author.getUsername()+") and wrote it";
-            log.info(String.format(
-                    LOG_INSERT
-                    ,username_log
-                    ,DATE_FORMAT.format(new Date())
-                    ,this.getClass().getName()
-                    ,"INFO"
-                    ,message));
+            String message ="user ("+username+") deleted this author ("+author.getUsername()+") and wrote it";
+            log.info(message);
             //map author with book  have  customer , to  prevent recursive
-            authorDto = convertNewForm(author,AuthorDto.class);
+            authorDto = convertNewForm(author,AuthorDtoO.class);
         } catch (IllegalArgumentException ex) {
             String message =AUTHOR_USERNAME_IS_NULL +" \\ "+SERVER_ERROR;
-            log.error(String.format(
-                    LOG_INSERT
-                    ,username_log
-                    ,DATE_FORMAT.format(new Date())
-                    ,this.getClass().getName()
-                    ,"ERROR"
-                    ,message));
+            log.error(message);
             throw new AuthorGeneralException(message);
         } catch (NullPointerException ex) {
             String message =SERVER_ERROR;
-            log.error(String.format(
-                    LOG_INSERT
-                    ,username_log
-                    ,DATE_FORMAT.format(new Date())
-                    ,this.getClass().getName()
-                    ,"ERROR"
-                    ,message));
+            log.error(message);
             throw new AuthorNotFoundException(message);
         }
-        authorDto.setPassword(null);
         return authorDto;
     }
 
-    public AuthorDto addAuthorBook(long id, String auth, BookDto bookDto) throws AuthorGeneralException {
-        AuthorDto authorDto;
-        String username_log = "";
+    public AuthorDtoO addAuthorBook(long id, String auth, BookDto bookDto) throws AuthorGeneralException {
+        AuthorDtoO authorDto;
         try {
             String username = jwtUtil.getUserName(auth);
-            username_log = username;
             if(username == null
                     || username.isEmpty()) {
                 String message =BAD_CREDENTIAL;
-                log.warn(String.format(
-                        LOG_INSERT
-                        ,auth
-                        ,DATE_FORMAT.format(new Date())
-                        ,this.getClass().getName()
-                        ,"WARN"
-                        ,message));
+                log.debug(message);
                 throw new AuthorGeneralException(BAD_CREDENTIAL,HttpStatus.BAD_REQUEST);
             }
             if(!bookShopUserUtil.getUserByUsername(username).isEnabled()) {
                 String message =USER_DEACTIVATED;
-                log.warn(String.format(
-                        LOG_INSERT
-                        ,username_log
-                        ,DATE_FORMAT.format(new Date())
-                        ,this.getClass().getName()
-                        ,"WARN"
-                        ,message));
+                log.debug(message);
                 throw new AuthorGeneralException(message,HttpStatus.BAD_REQUEST);
             }
             if(bookShopUserUtil.getUserRole(username) != RoleID.ADMIN.getRole()
                     && (bookShopUserUtil.getUserRole(username) != RoleID.AUTHOR.getRole()
                     || bookShopUserUtil.getUserByUsername(username).getId() != id) ) {
                 String message =UNAUTHORIZED_OPERATION;
-                log.warn(String.format(
-                        LOG_INSERT
-                        ,username_log
-                        ,DATE_FORMAT.format(new Date())
-                        ,this.getClass().getName()
-                        ,"WARN"
-                        ,message));
+                log.debug(message);
                 throw new AuthorGeneralException(message,HttpStatus.BAD_REQUEST);
             }
             Author author = authorService.getAuthorById(id);
             if(author == null){
                 String message =AUTHOR_NOT_EXISTS +" \\ "+BAD_REQUEST;
-                log.warn(String.format(
-                        LOG_INSERT
-                        ,username_log
-                        ,DATE_FORMAT.format(new Date())
-                        ,this.getClass().getName()
-                        ,"WARN"
-                        ,message));
+                log.debug(message);
                 throw new AuthorNotFoundException(message,HttpStatus.BAD_REQUEST);
             }
-           Author authorI = addBookToAuthor(author,bookDto,username_log);
-            authorDto = convertNewForm(authorI,AuthorDto.class);
+           Author authorI = addBookToAuthor(author,bookDto,username);
+            authorDto = convertNewForm(authorI,AuthorDtoO.class);
         } catch (IllegalArgumentException ex) {
             String message =AUTHOR_ID_IS_NULL +" \\ "+SERVER_ERROR;
-            log.error(String.format(
-                    LOG_INSERT
-                    ,username_log
-                    ,DATE_FORMAT.format(new Date())
-                    ,this.getClass().getName()
-                    ,"ERROR"
-                    ,message));
+            log.error(message);
             throw new AuthorGeneralException(message);
         } catch (NullPointerException ex) {
             String message =SERVER_ERROR;
-            log.error(String.format(
-                    LOG_INSERT
-                    ,username_log
-                    ,DATE_FORMAT.format(new Date())
-                    ,this.getClass().getName()
-                    ,"ERROR"
-                    ,message));
+            log.error(message);
             throw new AuthorNotFoundException(message);
         }
-        authorDto.setPassword(null);
         return authorDto;
     }
 
-    public AuthorDto addAuthorBook(String author_username, String auth, BookDto bookDto) throws AuthorGeneralException {
-        AuthorDto authorDto;
-        String username_log = "";
+    public AuthorDtoO addAuthorBook(String author_username, String auth, BookDto bookDto) throws AuthorGeneralException {
+        AuthorDtoO authorDto;
         try {
             String username = jwtUtil.getUserName(auth);
-            username_log = username;
             if(username == null
                     || username.isEmpty()) {
                 String message =BAD_CREDENTIAL;
-                log.warn(String.format(
-                        LOG_INSERT
-                        ,auth
-                        ,DATE_FORMAT.format(new Date())
-                        ,this.getClass().getName()
-                        ,"WARN"
-                        ,message));
+                log.debug(message);
                 throw new AuthorGeneralException(BAD_CREDENTIAL,HttpStatus.BAD_REQUEST);
             }
             if(!bookShopUserUtil.getUserByUsername(username).isEnabled()) {
                 String message =USER_DEACTIVATED;
-                log.warn(String.format(
-                        LOG_INSERT
-                        ,username_log
-                        ,DATE_FORMAT.format(new Date())
-                        ,this.getClass().getName()
-                        ,"WARN"
-                        ,message));
+                log.debug(message);
                 throw new AuthorGeneralException(message,HttpStatus.BAD_REQUEST);
             }
             if(bookShopUserUtil.getUserRole(username) != RoleID.ADMIN.getRole()
                     && (bookShopUserUtil.getUserRole(username) != RoleID.AUTHOR.getRole()
                     || !bookShopUserUtil.getUserByUsername(username).getUsername().equals(author_username)) ) {
                 String message =UNAUTHORIZED_OPERATION;
-                log.warn(String.format(
-                        LOG_INSERT
-                        ,username_log
-                        ,DATE_FORMAT.format(new Date())
-                        ,this.getClass().getName()
-                        ,"WARN"
-                        ,message));
+                log.debug(message);
                 throw new AuthorGeneralException(message,HttpStatus.BAD_REQUEST);
             }
             Author author = authorService.getAuthorByUsername(author_username);
             if(author == null){
                 String message =AUTHOR_NOT_EXISTS +" \\ "+BAD_REQUEST;
-                log.warn(String.format(
-                        LOG_INSERT
-                        ,username_log
-                        ,DATE_FORMAT.format(new Date())
-                        ,this.getClass().getName()
-                        ,"WARN"
-                        ,message));
+                log.debug(message);
                 throw new AuthorNotFoundException(message,HttpStatus.BAD_REQUEST);
             }
-            Author authorI = addBookToAuthor(author,bookDto,username_log);
-            authorDto = convertNewForm(authorI,AuthorDto.class);
+            Author authorI = addBookToAuthor(author,bookDto,username);
+            authorDto = convertNewForm(authorI,AuthorDtoO.class);
         } catch (IllegalArgumentException ex) {
             String message =AUTHOR_USERNAME_IS_NULL +" \\ "+SERVER_ERROR;
-            log.error(String.format(
-                    LOG_INSERT
-                    ,username_log
-                    ,DATE_FORMAT.format(new Date())
-                    ,this.getClass().getName()
-                    ,"ERROR"
-                    ,message));
+            log.error(message);
             throw new AuthorGeneralException(message);
         } catch (NullPointerException ex) {
             String message =SERVER_ERROR;
-            log.error(String.format(
-                    LOG_INSERT
-                    ,username_log
-                    ,DATE_FORMAT.format(new Date())
-                    ,this.getClass().getName()
-                    ,"ERROR"
-                    ,message));
+            log.error(message);
             throw new AuthorNotFoundException(message);
         }
-        authorDto.setPassword(null);
         return authorDto;
     }
 
@@ -971,50 +571,26 @@ public class AuthorUtil {
           if(bookDto == null
           || bookDto.getIsbn() == 0){
               String message =AUTHOR_BOOK_NULL +" \\ "+BAD_REQUEST;
-              log.warn(String.format(
-                      LOG_INSERT
-                      ,username_log
-                      ,DATE_FORMAT.format(new Date())
-                      ,this.getClass().getName()
-                      ,"WARN"
-                      ,message));
+              log.debug(message);
               throw new AuthorBookNull(message,HttpStatus.BAD_REQUEST);
           }
           if((bookService.getBookByIsbn(bookDto.getIsbn()) != null)) {
               String message = BOOK_EXISTS_BAD_REQUEST +" \\ "+BAD_REQUEST;
-              log.warn(String.format(
-                      LOG_INSERT
-                      ,username_log
-                      ,DATE_FORMAT.format(new Date())
-                      ,this.getClass().getName()
-                      ,"WARN"
-                      ,message));
+              log.debug(message);
               throw new BookExistsException(message,HttpStatus.CONFLICT);
           }
           if(bookDto.getCustomer() != null) {
               String message = FOR_EACH_ACTION +" \\ "+BAD_REQUEST;
-              log.warn(String.format(
-                      LOG_INSERT
-                      ,username_log
-                      ,DATE_FORMAT.format(new Date())
-                      ,this.getClass().getName()
-                      ,"WARN"
-                      ,message));
+              log.debug(message);
               throw new AuthorGeneralException(message,HttpStatus.CONFLICT);
           }
           Book book = convertNewForm(bookDto,Book.class);
           book.setAuthor(author);
-          book.setId(0);
+          book.setId(0);// ret
           author.addBook(book);
           author =  authorService.addAuthorOrUpdate(author);
           String message ="user ("+username_log+") add book("+book.getName()+" : "+book.getIsbn()+") for author ("+author.getUsername()+")";
-          log.info(String.format(
-                  LOG_INSERT
-                  ,username_log
-                  ,DATE_FORMAT.format(new Date())
-                  ,this.getClass().getName()
-                  ,"INFO"
-                  ,message));
+          log.info(message);
       } catch (NullPointerException
               | TransactionSystemException ex) {
           String message = AUTHOR_BOOK_NULL +" \\ "+SERVER_ERROR;
@@ -1030,575 +606,297 @@ public class AuthorUtil {
                | UnsupportedOperationException
                | IllegalArgumentException ex){
           String message = BOOK_LIST_PROBLEM +" \\ "+SERVER_ERROR;
-          log.error(String.format(
-                  LOG_INSERT
-                  ,username_log
-                  ,DATE_FORMAT.format(new Date())
-                  ,this.getClass().getName()
-                  ,"ERROR"
-                  ,message));
+          log.error(message);
           throw new AuthorGeneralException(message);
       } catch (DataIntegrityViolationException ex) {
           String message = BOOK_EXISTS_BAD_REQUEST +" \\ "+SERVER_ERROR;
-          log.error(String.format(
-                  LOG_INSERT
-                  ,username_log
-                  ,DATE_FORMAT.format(new Date())
-                  ,this.getClass().getName()
-                  ,"ERROR"
-                  ,message));
+          log.error(message);
           throw new BookExistsException(message,HttpStatus.INTERNAL_SERVER_ERROR);
       }
         return author;
     }
 
-    public AuthorDto addAuthorBooks(long id, List<BookDto> bookDtoList,String auth) throws AuthorGeneralException {
-        AuthorDto authorDto;
-        String username_log = "";
+    public AuthorDtoO addAuthorBooks(long id, List<BookDto> bookDtoList,String auth) throws AuthorGeneralException {
+        AuthorDtoO authorDto;
         try {
             String username = jwtUtil.getUserName(auth);
-            username_log = username;
             if(username == null
                     || username.isEmpty()) {
                 String message =BAD_CREDENTIAL;
-                log.warn(String.format(
-                        LOG_INSERT
-                        ,auth
-                        ,DATE_FORMAT.format(new Date())
-                        ,this.getClass().getName()
-                        ,"WARN"
-                        ,message));
+                log.debug(message);
                 throw new AuthorGeneralException(BAD_CREDENTIAL,HttpStatus.BAD_REQUEST);
             }
             if(!bookShopUserUtil.getUserByUsername(username).isEnabled()) {
                 String message =USER_DEACTIVATED;
-                log.warn(String.format(
-                        LOG_INSERT
-                        ,username_log
-                        ,DATE_FORMAT.format(new Date())
-                        ,this.getClass().getName()
-                        ,"WARN"
-                        ,message));
+                log.debug(message);
                 throw new AuthorGeneralException(message,HttpStatus.BAD_REQUEST);
             }
             if(bookShopUserUtil.getUserRole(username) != RoleID.ADMIN.getRole()
                     && (bookShopUserUtil.getUserRole(username) != RoleID.AUTHOR.getRole()
                     || bookShopUserUtil.getUserByUsername(username).getId() != id) ) {
                 String message =UNAUTHORIZED_OPERATION;
-                log.warn(String.format(
-                        LOG_INSERT
-                        ,username_log
-                        ,DATE_FORMAT.format(new Date())
-                        ,this.getClass().getName()
-                        ,"WARN"
-                        ,message));
+                log.debug(message);
                 throw new AuthorGeneralException(message,HttpStatus.BAD_REQUEST);
             }
             Author author = authorService.getAuthorById(id);
             if(author == null){
                 String message =AUTHOR_NOT_EXISTS +" \\ "+BAD_REQUEST;
-                log.warn(String.format(
-                        LOG_INSERT
-                        ,username_log
-                        ,DATE_FORMAT.format(new Date())
-                        ,this.getClass().getName()
-                        ,"WARN"
-                        ,message));
+                log.debug(message);
                 throw new AuthorNotFoundException(message,HttpStatus.BAD_REQUEST);
             }
             List<Book> books = mapListForm(bookDtoList,Book.class);
             if(books  == null
                     || books.isEmpty()){
                 String message = AUTHOR_BOOK_NULL +" \\ "+BAD_REQUEST;
-                log.warn(String.format(
-                        LOG_INSERT
-                        ,username_log
-                        ,DATE_FORMAT.format(new Date())
-                        ,this.getClass().getName()
-                        ,"WARN"
-                        ,message));
+                log.debug(message);
                 throw new AuthorBookNull(message,HttpStatus.BAD_REQUEST);
             }
-            authorDto = convertNewForm(addAuthorBooks(author,books,username_log),AuthorDto.class);
+            authorDto = convertNewForm(addAuthorBooks(author,books,username),AuthorDtoO.class);
         } catch (IllegalArgumentException ex) {
             String message = AUTHOR_ID_IS_NULL +" \\ "+SERVER_ERROR;
-            log.error(String.format(
-                    LOG_INSERT
-                    ,username_log
-                    ,DATE_FORMAT.format(new Date())
-                    ,this.getClass().getName()
-                    ,"ERROR"
-                    ,message));
+            log.error(message);
             throw new AuthorGeneralException(message);
         } catch (NullPointerException
                  |  IllegalStateException ex) {
             String message = AUTHOR_NULL_BAD_REQUEST +" \\ "+SERVER_ERROR;
-            log.error(String.format(
-                    LOG_INSERT
-                    ,username_log
-                    ,DATE_FORMAT.format(new Date())
-                    ,this.getClass().getName()
-                    ,"ERROR"
-                    ,message));
+            log.error(message);
             throw new AuthorNullException(message,HttpStatus.INTERNAL_SERVER_ERROR);
         }
-        authorDto.setPassword(null);
         return authorDto;
     }
 
-    public AuthorDto addAuthorBooks(String author_username, List<BookDto> bookDtoList,String auth) throws AuthorGeneralException {
-        AuthorDto authorDto;
-        String username_log = "";
+    public AuthorDtoO addAuthorBooks(String author_username, List<BookDto> bookDtoList,String auth) throws AuthorGeneralException {
+        AuthorDtoO authorDto;
         try {
             String username = jwtUtil.getUserName(auth);
-            username_log = username;
             if(username == null
                     || username.isEmpty()) {
                 String message =BAD_CREDENTIAL;
-                log.warn(String.format(
-                        LOG_INSERT
-                        ,auth
-                        ,DATE_FORMAT.format(new Date())
-                        ,this.getClass().getName()
-                        ,"WARN"
-                        ,message));
+                log.debug(message);
                 throw new AuthorGeneralException(BAD_CREDENTIAL,HttpStatus.BAD_REQUEST);
             }
             if(!bookShopUserUtil.getUserByUsername(username).isEnabled()) {
                 String message =USER_DEACTIVATED;
-                log.warn(String.format(
-                        LOG_INSERT
-                        ,username_log
-                        ,DATE_FORMAT.format(new Date())
-                        ,this.getClass().getName()
-                        ,"WARN"
-                        ,message));
+                log.debug(message);
                 throw new AuthorGeneralException(message,HttpStatus.BAD_REQUEST);
             }
             if(bookShopUserUtil.getUserRole(username) != RoleID.ADMIN.getRole()
                     && (bookShopUserUtil.getUserRole(username) != RoleID.AUTHOR.getRole()
                     || !bookShopUserUtil.getUserByUsername(username).getUsername().equals(author_username)) ) {
                 String message =UNAUTHORIZED_OPERATION;
-                log.warn(String.format(
-                        LOG_INSERT
-                        ,username_log
-                        ,DATE_FORMAT.format(new Date())
-                        ,this.getClass().getName()
-                        ,"WARN"
-                        ,message));
+                log.debug(message);
                 throw new AuthorGeneralException(message,HttpStatus.BAD_REQUEST);
             }
             Author author = authorService.getAuthorByUsername(author_username);
             if(author == null){
                 String message =AUTHOR_NOT_EXISTS +" \\ "+BAD_REQUEST;
-                log.warn(String.format(
-                        LOG_INSERT
-                        ,username_log
-                        ,DATE_FORMAT.format(new Date())
-                        ,this.getClass().getName()
-                        ,"WARN"
-                        ,message));
+                log.debug(message);
                 throw new AuthorNotFoundException(message,HttpStatus.BAD_REQUEST);
             }
             List<Book> books = mapListForm(bookDtoList,Book.class);
             if(books  == null
                     || books.isEmpty()){
                 String message = AUTHOR_BOOK_NULL +" \\ "+BAD_REQUEST;
-                log.warn(String.format(
-                        LOG_INSERT
-                        ,username_log
-                        ,DATE_FORMAT.format(new Date())
-                        ,this.getClass().getName()
-                        ,"WARN"
-                        ,message));
+                log.debug(message);
                 throw new AuthorBookNull(message,HttpStatus.BAD_REQUEST);
             }
-            authorDto = convertNewForm(addAuthorBooks(author,books,username_log),AuthorDto.class);
+            authorDto = convertNewForm(addAuthorBooks(author,books,username),AuthorDtoO.class);
         } catch (IllegalArgumentException ex) {
             String message = AUTHOR_USERNAME_IS_NULL +" \\ "+SERVER_ERROR;
-            log.error(String.format(
-                    LOG_INSERT
-                    ,username_log
-                    ,DATE_FORMAT.format(new Date())
-                    ,this.getClass().getName()
-                    ,"ERROR"
-                    ,message));
+            log.error(message);
             throw new AuthorGeneralException(message);
         } catch (NullPointerException
                  |  IllegalStateException ex) {
             String message = AUTHOR_NULL_BAD_REQUEST +" \\ "+SERVER_ERROR;
-            log.error(String.format(
-                    LOG_INSERT
-                    ,username_log
-                    ,DATE_FORMAT.format(new Date())
-                    ,this.getClass().getName()
-                    ,"ERROR"
-                    ,message));
+            log.error(message);
             throw new AuthorNullException(message,HttpStatus.INTERNAL_SERVER_ERROR);
         }
-        authorDto.setPassword(null);
         return authorDto;
     }
 
-    public BookDto deleteAuthorBookByIsbn(long id, long isbn, String auth) throws AuthorGeneralException {
-        BookDto bookDto;
-        String username_log = "";
+    public BookDtoO deleteAuthorBookByIsbn(long id, long isbn, String auth) throws AuthorGeneralException {
+        BookDtoO bookDto;
         try {
             String username = jwtUtil.getUserName(auth);
-            username_log = username;
             if(username == null
                     || username.isEmpty()) {
                 String message =BAD_CREDENTIAL;
-                log.warn(String.format(
-                        LOG_INSERT
-                        ,auth
-                        ,DATE_FORMAT.format(new Date())
-                        ,this.getClass().getName()
-                        ,"WARN"
-                        ,message));
+                log.debug(message);
                 throw new AuthorGeneralException(BAD_CREDENTIAL,HttpStatus.BAD_REQUEST);
             }
             if(!bookShopUserUtil.getUserByUsername(username).isEnabled()) {
                 String message =USER_DEACTIVATED;
-                log.warn(String.format(
-                        LOG_INSERT
-                        ,username_log
-                        ,DATE_FORMAT.format(new Date())
-                        ,this.getClass().getName()
-                        ,"WARN"
-                        ,message));
+                log.debug(message);
                 throw new AuthorGeneralException(message,HttpStatus.BAD_REQUEST);
             }
             if(bookShopUserUtil.getUserRole(username) != RoleID.ADMIN.getRole()
                     && (bookShopUserUtil.getUserRole(username) != RoleID.AUTHOR.getRole()
                     || bookShopUserUtil.getUserByUsername(username).getId() != id) ) {
                 String message =UNAUTHORIZED_OPERATION;
-                log.warn(String.format(
-                        LOG_INSERT
-                        ,username_log
-                        ,DATE_FORMAT.format(new Date())
-                        ,this.getClass().getName()
-                        ,"WARN"
-                        ,message));
+                log.debug(message);
                 throw new AuthorGeneralException(message,HttpStatus.BAD_REQUEST);
             }
             Author author = authorService.getAuthorById(id);
             if(author == null){
                 String message =AUTHOR_NOT_EXISTS +" \\ "+BAD_REQUEST;
-                log.warn(String.format(
-                        LOG_INSERT
-                        ,username_log
-                        ,DATE_FORMAT.format(new Date())
-                        ,this.getClass().getName()
-                        ,"WARN"
-                        ,message));
+                log.debug(message);
                 throw new AuthorNotFoundException(message,HttpStatus.BAD_REQUEST);
             }
             Book book = author.getBookByIsbn(isbn);
             if(book == null){
                 String message =BOOK_NOT_FOUND +" \\ "+BAD_REQUEST;
-                log.warn(String.format(
-                        LOG_INSERT
-                        ,username_log
-                        ,DATE_FORMAT.format(new Date())
-                        ,this.getClass().getName()
-                        ,"WARN"
-                        ,message));
+                log.debug(message);
                 throw new AuthorBookNotFound(message,HttpStatus.BAD_REQUEST);
             }
-            bookDto = convertNewForm(deleteAuthorBook(author,(b -> b.getId() != id),book,username_log),BookDto.class);
+            bookDto = convertNewForm(deleteAuthorBook(author,(b -> b.getIsbn() == isbn),book,username),BookDtoO.class);
         } catch (IllegalArgumentException ex) {
             String message = AUTHOR_ID_IS_NULL +" \\ "+SERVER_ERROR;
-            log.error(String.format(
-                    LOG_INSERT
-                    ,username_log
-                    ,DATE_FORMAT.format(new Date())
-                    ,this.getClass().getName()
-                    ,"ERROR"
-                    ,message));
+            log.error(message);
             throw new AuthorGeneralException(message);
         } catch (NullPointerException ex) {
             String message =SERVER_ERROR;
-            log.error(String.format(
-                    LOG_INSERT
-                    ,username_log
-                    ,DATE_FORMAT.format(new Date())
-                    ,this.getClass().getName()
-                    ,"ERROR"
-                    ,message));
+            log.error(message);
             throw new AuthorNotFoundException(message);
         }
         return bookDto;
     }
 
-    public BookDto deleteAuthorBookByIsbn(String author_username, long isbn, String auth) throws AuthorGeneralException {
-        BookDto bookDto;
-        String username_log = "";
+    public BookDtoO deleteAuthorBookByIsbn(String author_username, long isbn, String auth) throws AuthorGeneralException {
+        BookDtoO bookDto;
         try {
             String username = jwtUtil.getUserName(auth);
-            username_log = username;
             if(username == null
                     || username.isEmpty()) {
                 String message =BAD_CREDENTIAL;
-                log.warn(String.format(
-                        LOG_INSERT
-                        ,auth
-                        ,DATE_FORMAT.format(new Date())
-                        ,this.getClass().getName()
-                        ,"WARN"
-                        ,message));
+                log.debug(message);
                 throw new AuthorGeneralException(BAD_CREDENTIAL,HttpStatus.BAD_REQUEST);
             }
             if(!bookShopUserUtil.getUserByUsername(username).isEnabled()) {
                 String message =USER_DEACTIVATED;
-                log.warn(String.format(
-                        LOG_INSERT
-                        ,username_log
-                        ,DATE_FORMAT.format(new Date())
-                        ,this.getClass().getName()
-                        ,"WARN"
-                        ,message));
+                log.debug(message);
                 throw new AuthorGeneralException(message,HttpStatus.BAD_REQUEST);
             }
             if(bookShopUserUtil.getUserRole(username) != RoleID.ADMIN.getRole()
                     && (bookShopUserUtil.getUserRole(username) != RoleID.AUTHOR.getRole()
                     || !bookShopUserUtil.getUserByUsername(username).getUsername().equals(author_username)) ) {
                 String message =UNAUTHORIZED_OPERATION;
-                log.warn(String.format(
-                        LOG_INSERT
-                        ,username_log
-                        ,DATE_FORMAT.format(new Date())
-                        ,this.getClass().getName()
-                        ,"WARN"
-                        ,message));
+                log.debug(message);
                 throw new AuthorGeneralException(message,HttpStatus.BAD_REQUEST);
             }
             Author author = authorService.getAuthorByUsername(author_username);
             if(author == null){
                 String message =AUTHOR_NOT_EXISTS +" \\ "+BAD_REQUEST;
-                log.warn(String.format(
-                        LOG_INSERT
-                        ,username_log
-                        ,DATE_FORMAT.format(new Date())
-                        ,this.getClass().getName()
-                        ,"WARN"
-                        ,message));
+                log.debug(message);
                 throw new AuthorNotFoundException(message,HttpStatus.BAD_REQUEST);
             }
             Book book = author.getBookByIsbn(isbn);
             if(book == null){
                 String message =BOOK_NOT_FOUND +" \\ "+BAD_REQUEST;
-                log.warn(String.format(
-                        LOG_INSERT
-                        ,username_log
-                        ,DATE_FORMAT.format(new Date())
-                        ,this.getClass().getName()
-                        ,"WARN"
-                        ,message));
+                log.debug(message);
                 throw new AuthorBookNotFound(message,HttpStatus.BAD_REQUEST);
             }
-            bookDto = convertNewForm(deleteAuthorBook(author,(b -> b.getIsbn() == isbn),book,username_log),BookDto.class);
+            bookDto = convertNewForm(deleteAuthorBook(author,(b -> b.getIsbn() == isbn),book,username),BookDtoO.class);
         } catch (IllegalArgumentException ex) {
             String message = AUTHOR_USERNAME_IS_NULL +" \\ "+SERVER_ERROR;
-            log.error(String.format(
-                    LOG_INSERT
-                    ,username_log
-                    ,DATE_FORMAT.format(new Date())
-                    ,this.getClass().getName()
-                    ,"ERROR"
-                    ,message));
+            log.error(message);
             throw new AuthorGeneralException(message);
         } catch (NullPointerException ex) {
             String message =SERVER_ERROR;
-            log.error(String.format(
-                    LOG_INSERT
-                    ,username_log
-                    ,DATE_FORMAT.format(new Date())
-                    ,this.getClass().getName()
-                    ,"ERROR"
-                    ,message));
+            log.error(message);
             throw new AuthorNotFoundException(message);
         }
         return bookDto;
     }
 
-    public BookDto deleteAuthorBookById(long id, long book_id, String auth) throws AuthorGeneralException {
-        BookDto bookDto;
-        String username_log = "";
+    public BookDtoO deleteAuthorBookById(long id, long book_id, String auth) throws AuthorGeneralException {
+        BookDtoO bookDto;
         try {
             String username = jwtUtil.getUserName(auth);
-            username_log = username;
             if(username == null
                     || username.isEmpty()) {
                 String message =BAD_CREDENTIAL;
-                log.warn(String.format(
-                        LOG_INSERT
-                        ,auth
-                        ,DATE_FORMAT.format(new Date())
-                        ,this.getClass().getName()
-                        ,"WARN"
-                        ,message));
+                log.debug(message);
                 throw new AuthorGeneralException(BAD_CREDENTIAL,HttpStatus.BAD_REQUEST);
             }
             if(!bookShopUserUtil.getUserByUsername(username).isEnabled()) {
                 String message =USER_DEACTIVATED;
-                log.warn(String.format(
-                        LOG_INSERT
-                        ,username_log
-                        ,DATE_FORMAT.format(new Date())
-                        ,this.getClass().getName()
-                        ,"WARN"
-                        ,message));
+                log.debug(message);
                 throw new AuthorGeneralException(message,HttpStatus.BAD_REQUEST);
             }
             if(bookShopUserUtil.getUserRole(username) != RoleID.ADMIN.getRole()
                     && (bookShopUserUtil.getUserRole(username) != RoleID.AUTHOR.getRole()
                     || bookShopUserUtil.getUserByUsername(username).getId() != id) ) {
                 String message =UNAUTHORIZED_OPERATION;
-                log.warn(String.format(
-                        LOG_INSERT
-                        ,username_log
-                        ,DATE_FORMAT.format(new Date())
-                        ,this.getClass().getName()
-                        ,"WARN"
-                        ,message));
+                log.debug(message);
                 throw new AuthorGeneralException(message,HttpStatus.BAD_REQUEST);
             }
             Author author = authorService.getAuthorById(id);
             if(author == null){
                 String message =AUTHOR_NOT_EXISTS +" \\ "+BAD_REQUEST;
-                log.warn(String.format(
-                        LOG_INSERT
-                        ,username_log
-                        ,DATE_FORMAT.format(new Date())
-                        ,this.getClass().getName()
-                        ,"WARN"
-                        ,message));
+                log.debug(message);
                 throw new AuthorNotFoundException(message,HttpStatus.BAD_REQUEST);
             }
             Book book = author.getBookById(book_id);
             if(book == null){
                 String message =BOOK_NOT_FOUND +" \\ "+BAD_REQUEST;
-                log.warn(String.format(
-                        LOG_INSERT
-                        ,username_log
-                        ,DATE_FORMAT.format(new Date())
-                        ,this.getClass().getName()
-                        ,"WARN"
-                        ,message));
+                log.debug(message);
                 throw new AuthorBookNotFound(message,HttpStatus.BAD_REQUEST);
             }
-            bookDto = convertNewForm(deleteAuthorBook(author,(b -> b.getId() == book_id),book,username_log),BookDto.class);
+            bookDto = convertNewForm(deleteAuthorBook(author,(b -> b.getId() == book_id),book,username),BookDtoO.class);
         } catch (IllegalArgumentException ex) {
             String message = AUTHOR_ID_IS_NULL +" \\ "+SERVER_ERROR;
-            log.error(String.format(
-                    LOG_INSERT
-                    ,username_log
-                    ,DATE_FORMAT.format(new Date())
-                    ,this.getClass().getName()
-                    ,"ERROR"
-                    ,message));
+            log.error(message);
             throw new AuthorGeneralException(message);
         } catch (NullPointerException ex) {
             String message =SERVER_ERROR;
-            log.error(String.format(
-                    LOG_INSERT
-                    ,username_log
-                    ,DATE_FORMAT.format(new Date())
-                    ,this.getClass().getName()
-                    ,"ERROR"
-                    ,message));
+            log.error(message);
             throw new AuthorNotFoundException(message);
         }
         return bookDto;
     }
 
-    public BookDto deleteAuthorBookById(String author_username, long book_id, String auth) throws AuthorGeneralException {
-        BookDto bookDto;
-        String username_log = "";
+    public BookDtoO deleteAuthorBookById(String author_username, long book_id, String auth) throws AuthorGeneralException {
+        BookDtoO bookDto;
         try {
             String username = jwtUtil.getUserName(auth);
-            username_log = username;
             if(username == null
                     || username.isEmpty()) {
                 String message =BAD_CREDENTIAL;
-                log.warn(String.format(
-                        LOG_INSERT
-                        ,auth
-                        ,DATE_FORMAT.format(new Date())
-                        ,this.getClass().getName()
-                        ,"WARN"
-                        ,message));
+                log.debug(message);
                 throw new AuthorGeneralException(BAD_CREDENTIAL,HttpStatus.BAD_REQUEST);
             }
             if(!bookShopUserUtil.getUserByUsername(username).isEnabled()) {
                 String message =USER_DEACTIVATED;
-                log.warn(String.format(
-                        LOG_INSERT
-                        ,username_log
-                        ,DATE_FORMAT.format(new Date())
-                        ,this.getClass().getName()
-                        ,"WARN"
-                        ,message));
+                log.debug(message);
                 throw new AuthorGeneralException(message,HttpStatus.BAD_REQUEST);
             }
             if(bookShopUserUtil.getUserRole(username) != RoleID.ADMIN.getRole()
                     && (bookShopUserUtil.getUserRole(username) != RoleID.AUTHOR.getRole()
                     || !bookShopUserUtil.getUserByUsername(username).getUsername().equals(author_username)) ) {
                 String message =UNAUTHORIZED_OPERATION;
-                log.warn(String.format(
-                        LOG_INSERT
-                        ,username_log
-                        ,DATE_FORMAT.format(new Date())
-                        ,this.getClass().getName()
-                        ,"WARN"
-                        ,message));
+                log.debug(message);
                 throw new AuthorGeneralException(message,HttpStatus.BAD_REQUEST);
             }
             Author author = authorService.getAuthorByUsername(author_username);
             if(author == null){
                 String message =AUTHOR_NOT_EXISTS +" \\ "+BAD_REQUEST;
-                log.warn(String.format(
-                        LOG_INSERT
-                        ,username_log
-                        ,DATE_FORMAT.format(new Date())
-                        ,this.getClass().getName()
-                        ,"WARN"
-                        ,message));
+                log.debug(message);
                 throw new AuthorNotFoundException(message,HttpStatus.BAD_REQUEST);
             }
             Book book = author.getBookById(book_id);
             if(book == null){
                 String message =BOOK_NOT_FOUND +" \\ "+BAD_REQUEST;
-                log.warn(String.format(
-                        LOG_INSERT
-                        ,username_log
-                        ,DATE_FORMAT.format(new Date())
-                        ,this.getClass().getName()
-                        ,"WARN"
-                        ,message));
+                log.debug(message);
                 throw new AuthorBookNotFound(message,HttpStatus.BAD_REQUEST);
             }
-            bookDto = convertNewForm(deleteAuthorBook(author,(b -> b.getId() == book_id),book,username_log),BookDto.class);
+            bookDto = convertNewForm(deleteAuthorBook(author,(b -> b.getId() == book_id),book,username),BookDtoO.class);
         } catch (IllegalArgumentException ex) {
             String message = AUTHOR_USERNAME_IS_NULL +" \\ "+SERVER_ERROR;
-            log.error(String.format(
-                    LOG_INSERT
-                    ,username_log
-                    ,DATE_FORMAT.format(new Date())
-                    ,this.getClass().getName()
-                    ,"ERROR"
-                    ,message));
+            log.error(message);
             throw new AuthorGeneralException(message);
         } catch (NullPointerException ex) {
             String message =SERVER_ERROR;
-            log.error(String.format(
-                    LOG_INSERT
-                    ,username_log
-                    ,DATE_FORMAT.format(new Date())
-                    ,this.getClass().getName()
-                    ,"ERROR"
-                    ,message));
+            log.error(message);
             throw new AuthorNotFoundException(message);
         }
         return bookDto;
@@ -1619,194 +917,100 @@ public class AuthorUtil {
             author.removeBooks(filter);
             authorService.addAuthorOrUpdate(author);
             String message ="user ("+username_log+") delete book("+book.getName()+" : "+book.getIsbn()+") from author ("+author.getUsername()+")";
-            log.info(String.format(
-                    LOG_INSERT
-                    ,username_log
-                    ,DATE_FORMAT.format(new Date())
-                    ,this.getClass().getName()
-                    ,"INFO"
-                    ,message));
+            log.info(message);
             bookDto = convertNewForm(book,BookDto.class);
         } catch (NullPointerException
                  | IllegalArgumentException ex) {
             String message =(AUTHOR_BOOK_NULL +" \\ "+SERVER_ERROR);
-            log.error(String.format(
-                    LOG_INSERT
-                    ,username_log
-                    ,DATE_FORMAT.format(new Date())
-                    ,this.getClass().getName()
-                    ,"ERROR"
-                    ,message));
+            log.error(message);
             throw new AuthorBookNotFound(message,HttpStatus.INTERNAL_SERVER_ERROR);
         } catch (UnsupportedOperationException ex) {
             String message =(BOOKS_REMOVE_PROBLEM +" \\ "+SERVER_ERROR);
-            log.error(String.format(
-                    LOG_INSERT
-                    ,username_log
-                    ,DATE_FORMAT.format(new Date())
-                    ,this.getClass().getName()
-                    ,"ERROR"
-                    ,message));
+            log.error(message);
             throw new AuthorGeneralException(message);
         }
         return bookDto;
     }
 
-    public List<BookDto> deleteAuthorBooks(long id,String auth) throws AuthorGeneralException {
+    public List<BookDtoO> deleteAuthorBooks(long id,String auth) throws AuthorGeneralException {
         Author author;
-        List<BookDto> bookDtoList;
-        String username_log = "";
+        List<BookDtoO> bookDtoList;
         try {
             String username = jwtUtil.getUserName(auth);
-            username_log = username;
             if(username == null
                     || username.isEmpty()) {
                 String message =BAD_CREDENTIAL;
-                log.warn(String.format(
-                        LOG_INSERT
-                        ,auth
-                        ,DATE_FORMAT.format(new Date())
-                        ,this.getClass().getName()
-                        ,"WARN"
-                        ,message));
+                log.debug(message);
                 throw new AuthorGeneralException(BAD_CREDENTIAL,HttpStatus.BAD_REQUEST);
             }
             if(!bookShopUserUtil.getUserByUsername(username).isEnabled()) {
                 String message =USER_DEACTIVATED;
-                log.warn(String.format(
-                        LOG_INSERT
-                        ,username_log
-                        ,DATE_FORMAT.format(new Date())
-                        ,this.getClass().getName()
-                        ,"WARN"
-                        ,message));
+                log.debug(message);
                 throw new AuthorGeneralException(message,HttpStatus.BAD_REQUEST);
             }
             if(bookShopUserUtil.getUserRole(username) != RoleID.ADMIN.getRole()
                     && (bookShopUserUtil.getUserRole(username) != RoleID.AUTHOR.getRole()
                     || bookShopUserUtil.getUserByUsername(username).getId() != id) ) {
                 String message =UNAUTHORIZED_OPERATION;
-                log.warn(String.format(
-                        LOG_INSERT
-                        ,username_log
-                        ,DATE_FORMAT.format(new Date())
-                        ,this.getClass().getName()
-                        ,"WARN"
-                        ,message));
+                log.debug(message);
                 throw new AuthorGeneralException(message,HttpStatus.BAD_REQUEST);
             }
            author = authorService.getAuthorById(id);
             if(author == null){
                 String message =AUTHOR_NOT_EXISTS +" \\ "+BAD_REQUEST;
-                log.warn(String.format(
-                        LOG_INSERT
-                        ,username_log
-                        ,DATE_FORMAT.format(new Date())
-                        ,this.getClass().getName()
-                        ,"WARN"
-                        ,message));
+                log.debug(message);
                 throw new AuthorNotFoundException(message,HttpStatus.BAD_REQUEST);
             }
-            bookDtoList = mapListForm(deleteAuthorBooks(author,username), BookDto.class);
+            bookDtoList = mapListForm(deleteAuthorBooks(author,username), BookDtoO.class);
         } catch (IllegalArgumentException ex) {
             String message = AUTHOR_ID_IS_NULL +" \\ "+SERVER_ERROR;
-            log.error(String.format(
-                    LOG_INSERT
-                    ,username_log
-                    ,DATE_FORMAT.format(new Date())
-                    ,this.getClass().getName()
-                    ,"ERROR"
-                    ,message));
+            log.error(message);
             throw new AuthorGeneralException(message);
         }  catch (NullPointerException ex) {
             String message =SERVER_ERROR;
-            log.error(String.format(
-                    LOG_INSERT
-                    ,username_log
-                    ,DATE_FORMAT.format(new Date())
-                    ,this.getClass().getName()
-                    ,"ERROR"
-                    ,message));
+            log.error(message);
             throw new AuthorNotFoundException(message);
         }
         return bookDtoList;
     }
 
-    public List<BookDto> deleteAuthorBooks(String author_username, String auth) throws AuthorGeneralException {
+    public List<BookDtoO> deleteAuthorBooks(String author_username, String auth) throws AuthorGeneralException {
         Author author;
-        List<BookDto> bookDtoList;
-        String username_log = "";
+        List<BookDtoO> bookDtoList;
         try {
-            String username = jwtUtil.getUserName(auth);
-            username_log = username;
+            String username = jwtUtil.getUserName(auth);;
             if(username == null
                     || username.isEmpty()) {
                 String message =BAD_CREDENTIAL;
-                log.warn(String.format(
-                        LOG_INSERT
-                        ,auth
-                        ,DATE_FORMAT.format(new Date())
-                        ,this.getClass().getName()
-                        ,"WARN"
-                        ,message));
+                log.debug(message);
                 throw new AuthorGeneralException(BAD_CREDENTIAL,HttpStatus.BAD_REQUEST);
             }
             if(!bookShopUserUtil.getUserByUsername(username).isEnabled()) {
                 String message =USER_DEACTIVATED;
-                log.warn(String.format(
-                        LOG_INSERT
-                        ,username_log
-                        ,DATE_FORMAT.format(new Date())
-                        ,this.getClass().getName()
-                        ,"WARN"
-                        ,message));
+                log.debug(message);
                 throw new AuthorGeneralException(message,HttpStatus.BAD_REQUEST);
             }
             if(bookShopUserUtil.getUserRole(username) != RoleID.ADMIN.getRole()
                     && (bookShopUserUtil.getUserRole(username) != RoleID.AUTHOR.getRole()
                     || !bookShopUserUtil.getUserByUsername(username).getUsername().equals(author_username)) ) {
                 String message =UNAUTHORIZED_OPERATION;
-                log.warn(String.format(
-                        LOG_INSERT
-                        ,username_log
-                        ,DATE_FORMAT.format(new Date())
-                        ,this.getClass().getName()
-                        ,"WARN"
-                        ,message));
+                log.debug(message);
                 throw new AuthorGeneralException(message,HttpStatus.BAD_REQUEST);
             }
             author = authorService.getAuthorByUsername(author_username);
             if(author == null){
                 String message =AUTHOR_NOT_EXISTS +" \\ "+BAD_REQUEST;
-                log.warn(String.format(
-                        LOG_INSERT
-                        ,username_log
-                        ,DATE_FORMAT.format(new Date())
-                        ,this.getClass().getName()
-                        ,"WARN"
-                        ,message));
+                log.debug(message);
                 throw new AuthorNotFoundException(message,HttpStatus.BAD_REQUEST);
             }
-            bookDtoList = mapListForm(deleteAuthorBooks(author,username), BookDto.class);
+            bookDtoList = mapListForm(deleteAuthorBooks(author,username), BookDtoO.class);
         } catch (IllegalArgumentException ex) {
             String message = AUTHOR_USERNAME_IS_NULL +" \\ "+SERVER_ERROR;
-            log.error(String.format(
-                    LOG_INSERT
-                    ,username_log
-                    ,DATE_FORMAT.format(new Date())
-                    ,this.getClass().getName()
-                    ,"ERROR"
-                    ,message));
+            log.error(message);
             throw new AuthorGeneralException(message);
         }  catch (NullPointerException ex) {
             String message =SERVER_ERROR;
-            log.error(String.format(
-                    LOG_INSERT
-                    ,username_log
-                    ,DATE_FORMAT.format(new Date())
-                    ,this.getClass().getName()
-                    ,"ERROR"
-                    ,message));
+            log.error(message);
             throw new AuthorNotFoundException(message);
         }
         return bookDtoList;
@@ -1819,13 +1023,7 @@ public class AuthorUtil {
             if(books.isEmpty())
             {
                 String message = AUTHOR_EMPTY_BOOK_LIST+" \\ "+BAD_REQUEST;
-                log.warn(String.format(
-                        LOG_INSERT
-                        ,username
-                        ,DATE_FORMAT.format(new Date())
-                        ,this.getClass().getName()
-                        ,"WARN"
-                        ,message));
+                log.debug(message);
                 throw new AuthorBookNotFound(message,HttpStatus.INTERNAL_SERVER_ERROR);
             }
             for (Book book : books) {
@@ -1839,106 +1037,57 @@ public class AuthorUtil {
             author.removeAllBooks();
             authorService.addAuthorOrUpdate(author);
             String message = "this user ("+username+") delete all books of this author ("+author.getUsername()+")";
-            log.info(String.format(
-                    LOG_INSERT
-                    ,username
-                    ,DATE_FORMAT.format(new Date())
-                    ,this.getClass().getName()
-                    ,"INFO"
-                    ,message));
+            log.info(message);
             bookDtoList = mapListForm(books,BookDto.class);
         } catch (NullPointerException
                  | IllegalArgumentException
                  | IllegalStateException ex) {
             String message = AUTHOR_NULL_BAD_REQUEST +" \\ "+SERVER_ERROR;
-            log.error(String.format(
-                    LOG_INSERT
-                    ,username
-                    ,DATE_FORMAT.format(new Date())
-                    ,this.getClass().getName()
-                    ,"ERROR"
-                    ,message));
+            log.error(message);
             throw new AuthorBookNotFound(message,HttpStatus.INTERNAL_SERVER_ERROR);
         } catch (UnsupportedOperationException
                 | ClassCastException ex) {
             String message = BOOKS_REMOVE_PROBLEM + " \\ "+SERVER_ERROR;
-            log.error(String.format(
-                    LOG_INSERT
-                    ,username
-                    ,DATE_FORMAT.format(new Date())
-                    ,this.getClass().getName()
-                    ,"ERROR"
-                    ,message));
+            log.error(message);
             throw new AuthorGeneralException(message);
         }
         return bookDtoList;
     }
 
-    public AuthorDto updateAuthor(long id,AuthorDto authorI, String auth) throws AuthorGeneralException{
+    public AuthorDtoO updateAuthor(long id,AuthorDto authorI, String auth) throws AuthorGeneralException{
         AuthorDto authorDto;
-        String username_log = "";
+        AuthorDtoO authorDtoO;
         try {
             String username = jwtUtil.getUserName(auth);
-            username_log = username;
             if(username == null
                     || username.isEmpty()) {
                 String message =BAD_CREDENTIAL;
-                log.warn(String.format(
-                        LOG_INSERT
-                        ,auth
-                        ,DATE_FORMAT.format(new Date())
-                        ,this.getClass().getName()
-                        ,"WARN"
-                        ,message));
+                log.debug(message);
                 throw new AuthorGeneralException(BAD_CREDENTIAL,HttpStatus.BAD_REQUEST);
             }
             if(!bookShopUserUtil.getUserByUsername(username).isEnabled()) {
                 String message =USER_DEACTIVATED;
-                log.warn(String.format(
-                        LOG_INSERT
-                        ,username_log
-                        ,DATE_FORMAT.format(new Date())
-                        ,this.getClass().getName()
-                        ,"WARN"
-                        ,message));
+                log.debug(message);
                 throw new AuthorGeneralException(message,HttpStatus.BAD_REQUEST);
             }
             if(bookShopUserUtil.getUserRole(username) != RoleID.ADMIN.getRole()
                     && (bookShopUserUtil.getUserRole(username) != RoleID.AUTHOR.getRole()
                     || bookShopUserUtil.getUserByUsername(username).getId() != id) ) {
                 String message =UNAUTHORIZED_OPERATION;
-                log.warn(String.format(
-                        LOG_INSERT
-                        ,username_log
-                        ,DATE_FORMAT.format(new Date())
-                        ,this.getClass().getName()
-                        ,"WARN"
-                        ,message));
+                log.debug(message);
                 throw new AuthorGeneralException(message,HttpStatus.BAD_REQUEST);
             }
             Author author = authorService.getAuthorById(id);
             if(author == null){
                 String message =AUTHOR_NOT_EXISTS +" \\ "+BAD_REQUEST;
-                log.warn(String.format(
-                        LOG_INSERT
-                        ,username_log
-                        ,DATE_FORMAT.format(new Date())
-                        ,this.getClass().getName()
-                        ,"WARN"
-                        ,message));
+                log.debug(message);
                 throw new AuthorNotFoundException(message,HttpStatus.BAD_REQUEST);
             }
             if(authorI.getId() != Integer.MIN_VALUE
                     && authorI.getId() != 0
                     && authorI.getId() != id) {
                 String message = USER_ID_CHANGE_ERROR;
-                log.warn(String.format(
-                        LOG_INSERT
-                        ,username_log
-                        ,DATE_FORMAT.format(new Date())
-                        ,this.getClass().getName()
-                        ,"WARN"
-                        ,message));
+                log.debug(message);
                 throw new AuthorGeneralException(message,HttpStatus.BAD_REQUEST);
             }
             authorI.setId(author.getId());
@@ -1950,13 +1099,7 @@ public class AuthorUtil {
             else {
                 if(bookShopUserUtil.getUserByUsername(authorI.getUsername()) != null) {
                     String message = USERNAME_CONFLICT +" \\ "+ BAD_REQUEST;
-                    log.warn(String.format(
-                            LOG_INSERT
-                            ,username_log
-                            ,DATE_FORMAT.format(new Date())
-                            ,this.getClass().getName()
-                            ,"WARN"
-                            ,message));
+                    log.debug(message);
                     throw new AuthorExistsException(message,HttpStatus.BAD_REQUEST);
                 }
             }
@@ -1967,13 +1110,7 @@ public class AuthorUtil {
             } else {
                 if(authorI.getPassword().length() < PASSWORD_LENGTH) {
                     String message = PASSWORD_LENGTH_Problem + " \\ " + BAD_REQUEST;
-                    log.warn(String.format(
-                            LOG_INSERT
-                            ,username_log
-                            ,DATE_FORMAT.format(new Date())
-                            ,this.getClass().getName()
-                            ,"WARN"
-                            ,message));
+                    log.debug(message);
                     throw new AuthorGeneralException(message,HttpStatus.BAD_REQUEST);
                 }
             }
@@ -1983,132 +1120,70 @@ public class AuthorUtil {
             } else {
                 if (authorI.getRole() == RoleID.CUSTOMER.getRole()) {
                     String message = USER_CHANGE_ROLE_PROBLEM;
-                    log.warn(String.format(
-                            LOG_INSERT
-                            ,username_log
-                            ,DATE_FORMAT.format(new Date())
-                            ,this.getClass().getName()
-                            ,"WARN"
-                            ,message));
+                    log.debug(message);
                     throw new AuthorGeneralException(message,HttpStatus.BAD_REQUEST);
                 }
                 if(authorI.getRole() == RoleID.ADMIN.getRole()
                         && (bookShopUserUtil.getUserRole(username) != RoleID.ADMIN.getRole())) {
                     String message =UNAUTHORIZED_OPERATION;
-                    log.warn(String.format(
-                            LOG_INSERT
-                            ,username_log
-                            ,DATE_FORMAT.format(new Date())
-                            ,this.getClass().getName()
-                            ,"WARN"
-                            ,message));
+                    log.debug(message);
                     throw new AuthorGeneralException(message,HttpStatus.BAD_REQUEST);
                 }
             }
-            authorDto = updateAuthorWithOptionalBooks(authorI,author,username_log,auth);
+            authorDto = updateAuthorWithOptionalBooks(authorI,author,username,auth);
+            authorDtoO = convertNewForm(authorDto,AuthorDtoO.class);
         } catch (IllegalArgumentException ex) {
             String message = AUTHOR_ID_IS_NULL +" \\ "+SERVER_ERROR;
-            log.error(String.format(
-                    LOG_INSERT
-                    ,username_log
-                    ,DATE_FORMAT.format(new Date())
-                    ,this.getClass().getName()
-                    ,"ERROR"
-                    ,message));
+            log.error(message);
             throw new AuthorGeneralException(message);
         } catch (NullPointerException
                 | TransactionSystemException ex) {
             String message = AUTHOR_NULL_BAD_REQUEST +" \\ "+SERVER_ERROR;
-            log.error(String.format(
-                    LOG_INSERT
-                    ,username_log
-                    ,DATE_FORMAT.format(new Date())
-                    ,this.getClass().getName()
-                    ,"ERROR"
-                    ,message));
+            log.error(message);
             throw new AuthorBookNotFound(message,HttpStatus.INTERNAL_SERVER_ERROR);
         } catch (EntityExistsException
                 | DataIntegrityViolationException ex) {
             String message = "JPA: " + USER_CONFLICT+" \\ "+SERVER_ERROR;
-            log.error(String.format(
-                    LOG_INSERT
-                    ,username_log
-                    ,DATE_FORMAT.format(new Date())
-                    ,this.getClass().getName()
-                    ,"ERROR"
-                    ,message));
+            log.error(message);
             throw new AuthorGeneralException(message,HttpStatus.INTERNAL_SERVER_ERROR);
         }
-        authorDto.setPassword(null);
-        return authorDto;
+        return authorDtoO;
     }
 
-    public AuthorDto updateAuthor(String author_username,AuthorDto authorI, String auth) throws AuthorGeneralException{
+    public AuthorDtoO updateAuthor(String author_username,AuthorDto authorI, String auth) throws AuthorGeneralException{
         AuthorDto authorDto;
-        String username_log = "";
+        AuthorDtoO authorDtoO;
         try {
             String username = jwtUtil.getUserName(auth);
-            username_log = username;
             if(username == null
                     || username.isEmpty()) {
                 String message =BAD_CREDENTIAL;
-                log.warn(String.format(
-                        LOG_INSERT
-                        ,auth
-                        ,DATE_FORMAT.format(new Date())
-                        ,this.getClass().getName()
-                        ,"WARN"
-                        ,message));
+                log.debug(message);
                 throw new AuthorGeneralException(BAD_CREDENTIAL,HttpStatus.BAD_REQUEST);
             }
             if(!bookShopUserUtil.getUserByUsername(username).isEnabled()) {
                 String message =USER_DEACTIVATED;
-                log.warn(String.format(
-                        LOG_INSERT
-                        ,username_log
-                        ,DATE_FORMAT.format(new Date())
-                        ,this.getClass().getName()
-                        ,"WARN"
-                        ,message));
+                log.debug(message);
                 throw new AuthorGeneralException(message,HttpStatus.BAD_REQUEST);
             }
             if(bookShopUserUtil.getUserRole(username) != RoleID.ADMIN.getRole()
                     && (bookShopUserUtil.getUserRole(username) != RoleID.AUTHOR.getRole()
                     || !bookShopUserUtil.getUserByUsername(username).getUsername().equals(author_username))) {
-
                 String message =UNAUTHORIZED_OPERATION;
-                log.warn(String.format(
-                        LOG_INSERT
-                        ,username_log
-                        ,DATE_FORMAT.format(new Date())
-                        ,this.getClass().getName()
-                        ,"WARN"
-                        ,message));
+                log.debug(message);
                 throw new AuthorGeneralException(message,HttpStatus.BAD_REQUEST);
             }
             Author author = authorService.getAuthorByUsername(author_username);
             if(author == null){
                 String message =AUTHOR_NOT_EXISTS +" \\ "+BAD_REQUEST;
-                log.warn(String.format(
-                        LOG_INSERT
-                        ,username_log
-                        ,DATE_FORMAT.format(new Date())
-                        ,this.getClass().getName()
-                        ,"WARN"
-                        ,message));
+                log.debug(message);
                 throw new AuthorNotFoundException(message,HttpStatus.BAD_REQUEST);
             }
             if(authorI.getId() != Integer.MIN_VALUE
                     && authorI.getId() != 0
                     && authorI.getId() != author.getId()) {
                 String message = USER_ID_CHANGE_ERROR;
-                log.warn(String.format(
-                        LOG_INSERT
-                        ,username_log
-                        ,DATE_FORMAT.format(new Date())
-                        ,this.getClass().getName()
-                        ,"WARN"
-                        ,message));
+                log.debug(message);
                 throw new AuthorGeneralException(message,HttpStatus.BAD_REQUEST);
             }
             authorI.setId(author.getId());
@@ -2120,13 +1195,7 @@ public class AuthorUtil {
             else {
                 if(bookShopUserUtil.getUserByUsername(authorI.getUsername()) != null) {
                     String message = USERNAME_CONFLICT +" \\ "+ BAD_REQUEST;
-                    log.warn(String.format(
-                            LOG_INSERT
-                            ,username_log
-                            ,DATE_FORMAT.format(new Date())
-                            ,this.getClass().getName()
-                            ,"WARN"
-                            ,message));
+                    log.debug(message);
                     throw new AuthorExistsException(message,HttpStatus.BAD_REQUEST);
                 }
             }
@@ -2137,13 +1206,7 @@ public class AuthorUtil {
             } else {
                 if(authorI.getPassword().length() < PASSWORD_LENGTH) {
                     String message = PASSWORD_LENGTH_Problem + " \\ " + BAD_REQUEST;
-                    log.warn(String.format(
-                            LOG_INSERT
-                            ,username_log
-                            ,DATE_FORMAT.format(new Date())
-                            ,this.getClass().getName()
-                            ,"WARN"
-                            ,message));
+                    log.debug(message);
                     throw new AuthorGeneralException(message,HttpStatus.BAD_REQUEST);
                 }
             }
@@ -2153,64 +1216,34 @@ public class AuthorUtil {
             } else {
                 if (authorI.getRole() == RoleID.CUSTOMER.getRole()) {
                     String message = USER_CHANGE_ROLE_PROBLEM;
-                    log.warn(String.format(
-                            LOG_INSERT
-                            ,username_log
-                            ,DATE_FORMAT.format(new Date())
-                            ,this.getClass().getName()
-                            ,"WARN"
-                            ,message));
+                    log.debug(message);
                     throw new AuthorGeneralException(message,HttpStatus.BAD_REQUEST);
                 }
                 if(authorI.getRole() == RoleID.ADMIN.getRole()
                         && (bookShopUserUtil.getUserRole(username) != RoleID.ADMIN.getRole())) {
                     String message =UNAUTHORIZED_OPERATION;
-                    log.warn(String.format(
-                            LOG_INSERT
-                            ,username_log
-                            ,DATE_FORMAT.format(new Date())
-                            ,this.getClass().getName()
-                            ,"WARN"
-                            ,message));
+                    log.debug(message);
                     throw new AuthorGeneralException(message,HttpStatus.BAD_REQUEST);
                 }
             }
-            authorDto = updateAuthorWithOptionalBooks(authorI,author,username_log,auth);
+            authorDto = updateAuthorWithOptionalBooks(authorI,author,username,auth);
+            authorDtoO = convertNewForm(authorDto,AuthorDtoO.class);
         } catch (IllegalArgumentException ex) {
             String message = AUTHOR_USERNAME_IS_NULL +" \\ "+SERVER_ERROR;
-            log.error(String.format(
-                    LOG_INSERT
-                    ,username_log
-                    ,DATE_FORMAT.format(new Date())
-                    ,this.getClass().getName()
-                    ,"ERROR"
-                    ,message));
+            log.error(message);
             throw new AuthorGeneralException(message);
         } catch (NullPointerException
                  | TransactionSystemException ex) {
             String message = AUTHOR_NULL_BAD_REQUEST +" \\ "+SERVER_ERROR;
-            log.error(String.format(
-                    LOG_INSERT
-                    ,username_log
-                    ,DATE_FORMAT.format(new Date())
-                    ,this.getClass().getName()
-                    ,"ERROR"
-                    ,message));
+            log.error(message);
             throw new AuthorBookNotFound(message,HttpStatus.INTERNAL_SERVER_ERROR);
         } catch (EntityExistsException
                  | DataIntegrityViolationException ex) {
             String message = "JPA: " + USER_CONFLICT+" \\ "+SERVER_ERROR;
-            log.error(String.format(
-                    LOG_INSERT
-                    ,username_log
-                    ,DATE_FORMAT.format(new Date())
-                    ,this.getClass().getName()
-                    ,"ERROR"
-                    ,message));
+            log.error(message);
             throw new AuthorGeneralException(message,HttpStatus.INTERNAL_SERVER_ERROR);
         }
-        authorDto.setPassword(null);
-        return authorDto;
+        return authorDtoO;
     }
 
     private AuthorDto updateAuthorWithOptionalBooks(AuthorDto authorDto,Author author,String username,String auth) {
@@ -2231,773 +1264,399 @@ public class AuthorUtil {
             List<Book> books = new ArrayList<>(authorI.getBooks());
             authorI.setBooks(author.getBooks());
             authorI = authorService.addAuthorOrUpdate(authorI);
-            //authorI = this.addAuthorBooks(authorI, books,username);
+            authorI = this.addAuthorBooks(authorI, books,username);
             authorDto = convertNewForm(authorI,AuthorDto.class);
-            log.info(String.format(
-                    LOG_INSERT
-                    ,username
-                    ,DATE_FORMAT.format(new Date())
-                    ,this.getClass().getName()
-                    ,"INFO"
-                    ,"user (" + username +") has been update this author (" + authorI.getUsername()+")"));
+            log.info("user (" + username +") has been update this author (" + authorI.getUsername()+")");
         } catch (IllegalArgumentException
                 | NullPointerException ex) {
             String message = AUTHOR_NULL+" \\ "+SERVER_ERROR;
-            log.error(String.format(
-                    LOG_INSERT
-                    ,username
-                    ,DATE_FORMAT.format(new Date())
-                    ,this.getClass().getName()
-                    ,"ERROR"
-                    ,message));
+            log.error(message);
             throw new AuthorNullException(message,HttpStatus.INTERNAL_SERVER_ERROR);
         }
         return authorDto;
     }
 
-    public BookDto getAuthorBookByIsbn(long id, long isbn, String auth) throws AuthorGeneralException {
-        BookDto bookDto;
-        String username_log = "";
+    public BookDtoO getAuthorBookByIsbn(long id, long isbn, String auth) throws AuthorGeneralException {
+        BookDtoO bookDto;
         try {
             String username = jwtUtil.getUserName(auth);
-            username_log = username;
             if(username == null
                     || username.isEmpty()) {
                 String message =BAD_CREDENTIAL;
-                log.warn(String.format(
-                        LOG_INSERT
-                        ,auth
-                        ,DATE_FORMAT.format(new Date())
-                        ,this.getClass().getName()
-                        ,"WARN"
-                        ,message));
+                log.debug(message);
                 throw new AuthorGeneralException(BAD_CREDENTIAL,HttpStatus.BAD_REQUEST);
             }
             if(!bookShopUserUtil.getUserByUsername(username).isEnabled()) {
                 String message =USER_DEACTIVATED;
-                log.warn(String.format(
-                        LOG_INSERT
-                        ,username_log
-                        ,DATE_FORMAT.format(new Date())
-                        ,this.getClass().getName()
-                        ,"WARN"
-                        ,message));
+                log.debug(message);
                 throw new AuthorGeneralException(message,HttpStatus.BAD_REQUEST);
             }
             Author author = authorService.getAuthorById(id);
             if(author == null){
                 String message =AUTHOR_NOT_EXISTS +" \\ "+BAD_REQUEST;
-                log.warn(String.format(
-                        LOG_INSERT
-                        ,username_log
-                        ,DATE_FORMAT.format(new Date())
-                        ,this.getClass().getName()
-                        ,"WARN"
-                        ,message));
+                log.debug(message);
                 throw new AuthorNotFoundException(message,HttpStatus.BAD_REQUEST);
             }
             Book book = author.getBookByIsbn(isbn);
             if(book == null){
                 String message =BOOK_NOT_FOUND +" \\ "+BAD_REQUEST;
-                log.warn(String.format(
-                        LOG_INSERT
-                        ,username_log
-                        ,DATE_FORMAT.format(new Date())
-                        ,this.getClass().getName()
-                        ,"WARN"
-                        ,message));
+                log.debug(message);
                 throw new AuthorBookNotFound(message,HttpStatus.NO_CONTENT);
             }
-            bookDto = convertNewForm(book,BookDto.class);
-            String message ="user ("+username_log+") get author ("+author.getUsername()+") book ("+book.getIsbn()+")";
-            log.info(String.format(
-                    LOG_INSERT
-                    ,username_log
-                    ,DATE_FORMAT.format(new Date())
-                    ,this.getClass().getName()
-                    ,"INFO"
-                    ,message));
+            bookDto = convertNewForm(book,BookDtoO.class);
+            String message ="user ("+username+") get author ("+author.getUsername()+") book ("+book.getIsbn()+")";
+            log.info(message);
         } catch (IllegalArgumentException ex) {
             String message = AUTHOR_ID_IS_NULL +" \\ "+SERVER_ERROR;
-            log.error(String.format(
-                    LOG_INSERT
-                    ,username_log
-                    ,DATE_FORMAT.format(new Date())
-                    ,this.getClass().getName()
-                    ,"ERROR"
-                    ,message));
+            log.error(message);
             throw new AuthorGeneralException(message);
        } catch (NullPointerException
                  | UnsupportedOperationException ex) {
             String message =SERVER_ERROR;
-            log.error(String.format(
-                    LOG_INSERT
-                    ,username_log
-                    ,DATE_FORMAT.format(new Date())
-                    ,this.getClass().getName()
-                    ,"ERROR"
-                    ,message));
+            log.error(message);
             throw new AuthorNotFoundException(message);
         }
         return bookDto;
     }
 
-    public BookDto getAuthorBookByIsbn(String author_username, long isbn, String auth) throws AuthorGeneralException {
-        BookDto bookDto;
-        String username_log = "";
+    public BookDtoO getAuthorBookByIsbn(String author_username, long isbn, String auth) throws AuthorGeneralException {
+        BookDtoO bookDto;
         try {
             String username = jwtUtil.getUserName(auth);
-            username_log = username;
             if(username == null
                     || username.isEmpty()) {
                 String message =BAD_CREDENTIAL;
-                log.warn(String.format(
-                        LOG_INSERT
-                        ,auth
-                        ,DATE_FORMAT.format(new Date())
-                        ,this.getClass().getName()
-                        ,"WARN"
-                        ,message));
+                log.debug(message);
                 throw new AuthorGeneralException(BAD_CREDENTIAL,HttpStatus.BAD_REQUEST);
             }
             if(!bookShopUserUtil.getUserByUsername(username).isEnabled()) {
                 String message =USER_DEACTIVATED;
-                log.warn(String.format(
-                        LOG_INSERT
-                        ,username_log
-                        ,DATE_FORMAT.format(new Date())
-                        ,this.getClass().getName()
-                        ,"WARN"
-                        ,message));
+                log.debug(message);
                 throw new AuthorGeneralException(message,HttpStatus.BAD_REQUEST);
             }
             Author author = authorService.getAuthorByUsername(author_username);
             if(author == null){
                 String message =AUTHOR_NOT_EXISTS +" \\ "+BAD_REQUEST;
-                log.warn(String.format(
-                        LOG_INSERT
-                        ,username_log
-                        ,DATE_FORMAT.format(new Date())
-                        ,this.getClass().getName()
-                        ,"WARN"
-                        ,message));
+                log.debug(message);
                 throw new AuthorNotFoundException(message,HttpStatus.BAD_REQUEST);
             }
             Book book = author.getBookByIsbn(isbn);
             if(book == null){
                 String message =BOOK_NOT_FOUND +" \\ "+BAD_REQUEST;
-                log.warn(String.format(
-                        LOG_INSERT
-                        ,username_log
-                        ,DATE_FORMAT.format(new Date())
-                        ,this.getClass().getName()
-                        ,"WARN"
-                        ,message));
+                log.debug(message);
                 throw new AuthorBookNotFound(message,HttpStatus.NO_CONTENT);
             }
-            bookDto = convertNewForm(book,BookDto.class);
-            String message ="user ("+username_log+") get author ("+author.getUsername()+") book ("+book.getIsbn()+")";
-            log.info(String.format(
-                    LOG_INSERT
-                    ,username_log
-                    ,DATE_FORMAT.format(new Date())
-                    ,this.getClass().getName()
-                    ,"INFO"
-                    ,message));
+            bookDto = convertNewForm(book,BookDtoO.class);
+            String message ="user ("+username+") get author ("+author.getUsername()+") book ("+book.getIsbn()+")";
+            log.info(message);
         } catch (IllegalArgumentException ex) {
             String message = AUTHOR_USERNAME_IS_NULL +" \\ "+SERVER_ERROR;
-            log.error(String.format(
-                    LOG_INSERT
-                    ,username_log
-                    ,DATE_FORMAT.format(new Date())
-                    ,this.getClass().getName()
-                    ,"ERROR"
-                    ,message));
+            log.error(message);
             throw new AuthorGeneralException(message);
         } catch (NullPointerException
                  | UnsupportedOperationException ex) {
             String message =SERVER_ERROR;
-            log.error(String.format(
-                    LOG_INSERT
-                    ,username_log
-                    ,DATE_FORMAT.format(new Date())
-                    ,this.getClass().getName()
-                    ,"ERROR"
-                    ,message));
+            log.error(message);
             throw new AuthorNotFoundException(message);
         }
         return bookDto;
     }
 
-    public BookDto getAuthorBookById(long id, long bookId, String auth) throws AuthorGeneralException {
-        BookDto bookDto;
-        String username_log = "";
+    public BookDtoO getAuthorBookById(long id, long bookId, String auth) throws AuthorGeneralException {
+        BookDtoO bookDto;
         try {
             String username = jwtUtil.getUserName(auth);
-            username_log = username;
             if(username == null
                     || username.isEmpty()) {
                 String message =BAD_CREDENTIAL;
-                log.warn(String.format(
-                        LOG_INSERT
-                        ,auth
-                        ,DATE_FORMAT.format(new Date())
-                        ,this.getClass().getName()
-                        ,"WARN"
-                        ,message));
+                log.debug(message);
                 throw new AuthorGeneralException(BAD_CREDENTIAL,HttpStatus.BAD_REQUEST);
             }
             if(!bookShopUserUtil.getUserByUsername(username).isEnabled()) {
                 String message =USER_DEACTIVATED;
-                log.warn(String.format(
-                        LOG_INSERT
-                        ,username_log
-                        ,DATE_FORMAT.format(new Date())
-                        ,this.getClass().getName()
-                        ,"WARN"
-                        ,message));
+                log.debug(message);
                 throw new AuthorGeneralException(message,HttpStatus.BAD_REQUEST);
             }
             Author author = authorService.getAuthorById(id);
             if(author == null){
                 String message =AUTHOR_NOT_EXISTS +" \\ "+BAD_REQUEST;
-                log.warn(String.format(
-                        LOG_INSERT
-                        ,username_log
-                        ,DATE_FORMAT.format(new Date())
-                        ,this.getClass().getName()
-                        ,"WARN"
-                        ,message));
+                log.debug(message);
                 throw new AuthorNotFoundException(message,HttpStatus.BAD_REQUEST);
             }
             Book book = author.getBookById(bookId);
             if(book == null){
                 String message =BOOK_NOT_FOUND +" \\ "+BAD_REQUEST;
-                log.warn(String.format(
-                        LOG_INSERT
-                        ,username_log
-                        ,DATE_FORMAT.format(new Date())
-                        ,this.getClass().getName()
-                        ,"WARN"
-                        ,message));
+                log.debug(message);
                 throw new AuthorBookNotFound(message,HttpStatus.NO_CONTENT);
             }
-            bookDto = convertNewForm(book,BookDto.class);
-            String message ="user ("+username_log+") get author ("+author.getUsername()+") book ("+book.getIsbn()+")";
-            log.info(String.format(
-                    LOG_INSERT
-                    ,username_log
-                    ,DATE_FORMAT.format(new Date())
-                    ,this.getClass().getName()
-                    ,"INFO"
-                    ,message));
+            bookDto = convertNewForm(book,BookDtoO.class);
+            String message ="user ("+username+") get author ("+author.getUsername()+") book ("+book.getIsbn()+")";
+            log.info(message);
         } catch (IllegalArgumentException ex) {
             String message = AUTHOR_ID_IS_NULL +" \\ "+SERVER_ERROR;
-            log.error(String.format(
-                    LOG_INSERT
-                    ,username_log
-                    ,DATE_FORMAT.format(new Date())
-                    ,this.getClass().getName()
-                    ,"ERROR"
-                    ,message));
+            log.error(message);
             throw new AuthorGeneralException(message);
         } catch (NullPointerException
                  | UnsupportedOperationException ex) {
             String message =SERVER_ERROR;
-            log.error(String.format(
-                    LOG_INSERT
-                    ,username_log
-                    ,DATE_FORMAT.format(new Date())
-                    ,this.getClass().getName()
-                    ,"ERROR"
-                    ,message));
+            log.error(message);
             throw new AuthorNotFoundException(message);
         }
         return bookDto;
     }
 
-    public BookDto getAuthorBookById(String author_username, long bookId, String auth) throws AuthorGeneralException {
-        BookDto bookDto;
-        String username_log = "";
+    public BookDtoO getAuthorBookById(String author_username, long bookId, String auth) throws AuthorGeneralException {
+        BookDtoO bookDto;
         try {
             String username = jwtUtil.getUserName(auth);
-            username_log = username;
             if(username == null
                     || username.isEmpty()) {
                 String message =BAD_CREDENTIAL;
-                log.warn(String.format(
-                        LOG_INSERT
-                        ,auth
-                        ,DATE_FORMAT.format(new Date())
-                        ,this.getClass().getName()
-                        ,"WARN"
-                        ,message));
+                log.debug(message);
                 throw new AuthorGeneralException(BAD_CREDENTIAL,HttpStatus.BAD_REQUEST);
             }
             if(!bookShopUserUtil.getUserByUsername(username).isEnabled()) {
                 String message =USER_DEACTIVATED;
-                log.warn(String.format(
-                        LOG_INSERT
-                        ,username_log
-                        ,DATE_FORMAT.format(new Date())
-                        ,this.getClass().getName()
-                        ,"WARN"
-                        ,message));
+                log.debug(message);
                 throw new AuthorGeneralException(message,HttpStatus.BAD_REQUEST);
             }
             Author author = authorService.getAuthorByUsername(author_username);
             if(author == null){
                 String message =AUTHOR_NOT_EXISTS +" \\ "+BAD_REQUEST;
-                log.warn(String.format(
-                        LOG_INSERT
-                        ,username_log
-                        ,DATE_FORMAT.format(new Date())
-                        ,this.getClass().getName()
-                        ,"WARN"
-                        ,message));
+                log.debug(message);
                 throw new AuthorNotFoundException(message,HttpStatus.BAD_REQUEST);
             }
             Book book = author.getBookById(bookId);
             if(book == null){
                 String message =BOOK_NOT_FOUND +" \\ "+BAD_REQUEST;
-                log.warn(String.format(
-                        LOG_INSERT
-                        ,username_log
-                        ,DATE_FORMAT.format(new Date())
-                        ,this.getClass().getName()
-                        ,"WARN"
-                        ,message));
+                log.debug(message);
                 throw new AuthorBookNotFound(message,HttpStatus.NO_CONTENT);
             }
-            bookDto = convertNewForm(book,BookDto.class);
-            String message ="user ("+username_log+") get author ("+author.getUsername()+") book ("+book.getIsbn()+")";
-            log.info(String.format(
-                    LOG_INSERT
-                    ,username_log
-                    ,DATE_FORMAT.format(new Date())
-                    ,this.getClass().getName()
-                    ,"INFO"
-                    ,message));
+            bookDto = convertNewForm(book,BookDtoO.class);
+            String message ="user ("+username+") get author ("+author.getUsername()+") book ("+book.getIsbn()+")";
+            log.info(message);
         } catch (IllegalArgumentException ex) {
             String message = AUTHOR_USERNAME_IS_NULL +" \\ "+SERVER_ERROR;
-            log.error(String.format(
-                    LOG_INSERT
-                    ,username_log
-                    ,DATE_FORMAT.format(new Date())
-                    ,this.getClass().getName()
-                    ,"ERROR"
-                    ,message));
+            log.error(message);
             throw new AuthorGeneralException(message);
         } catch (NullPointerException
                  | UnsupportedOperationException ex) {
             String message =SERVER_ERROR;
-            log.error(String.format(
-                    LOG_INSERT
-                    ,username_log
-                    ,DATE_FORMAT.format(new Date())
-                    ,this.getClass().getName()
-                    ,"ERROR"
-                    ,message));
+            log.error(message);
             throw new AuthorNotFoundException(message);
         }
         return bookDto;
     }
 
-    public BookDto updateAuthorBookByIsbn(long id, long isbn, BookDto bookDto, String auth) throws AuthorGeneralException {
-        String username_log = "";
+    public BookDtoO updateAuthorBookByIsbn(long id, long isbn, BookDto bookDto, String auth) throws AuthorGeneralException {
+        BookDtoO bookDtoO;
         try {
             String username = jwtUtil.getUserName(auth);
-            username_log = username;
             if (username == null
                     || username.isEmpty()) {
                 String message = BAD_CREDENTIAL;
-                log.warn(String.format(
-                        LOG_INSERT
-                        , auth
-                        , DATE_FORMAT.format(new Date())
-                        , this.getClass().getName()
-                        , "WARN"
-                        , message));
+                log.debug(message);
                 throw new AuthorGeneralException(BAD_CREDENTIAL, HttpStatus.BAD_REQUEST);
             }
             if (!bookShopUserUtil.getUserByUsername(username).isEnabled()) {
                 String message = USER_DEACTIVATED;
-                log.warn(String.format(
-                        LOG_INSERT
-                        , username_log
-                        , DATE_FORMAT.format(new Date())
-                        , this.getClass().getName()
-                        , "WARN"
-                        , message));
+                log.debug(message);
                 throw new AuthorGeneralException(message, HttpStatus.BAD_REQUEST);
             }
             if (bookShopUserUtil.getUserRole(username) != RoleID.ADMIN.getRole()
                     && (bookShopUserUtil.getUserRole(username) != RoleID.AUTHOR.getRole()
                     || bookShopUserUtil.getUserByUsername(username).getId() != id)) {
                 String message = UNAUTHORIZED_OPERATION;
-                log.warn(String.format(
-                        LOG_INSERT
-                        , username_log
-                        , DATE_FORMAT.format(new Date())
-                        , this.getClass().getName()
-                        , "WARN"
-                        , message));
+                log.debug(message);
                 throw new AuthorGeneralException(message, HttpStatus.BAD_REQUEST);
             }
             Author author = authorService.getAuthorById(id);
             if (author == null) {
                 String message = AUTHOR_NOT_EXISTS + " \\ " + BAD_REQUEST;
-                log.warn(String.format(
-                        LOG_INSERT
-                        , username_log
-                        , DATE_FORMAT.format(new Date())
-                        , this.getClass().getName()
-                        , "WARN"
-                        , message));
+                log.debug(message);
                 throw new AuthorNotFoundException(message, HttpStatus.BAD_REQUEST);
             }
             Book book = author.getBookByIsbn(isbn);
             if (book == null) {
                 String message = BOOK_NOT_FOUND + " \\ " + BAD_REQUEST;
-                log.warn(String.format(
-                        LOG_INSERT
-                        , username_log
-                        , DATE_FORMAT.format(new Date())
-                        , this.getClass().getName()
-                        , "WARN"
-                        , message));
+                log.debug(message);
                 throw new AuthorBookNotFound(message, HttpStatus.NO_CONTENT);
             }
-            book = updateAuthorBook(author,book,convertNewForm(bookDto,Book.class),username_log);
-            bookDto = convertNewForm(book,BookDto.class);
+            book = updateAuthorBook(book,convertNewForm(bookDto,Book.class),username);
+            bookDtoO = convertNewForm(book,BookDtoO.class);
         } catch (IllegalArgumentException ex) {
             String message =AUTHOR_ID_IS_NULL +" \\ "+SERVER_ERROR;
-            log.error(String.format(
-                    LOG_INSERT
-                    ,username_log
-                    ,DATE_FORMAT.format(new Date())
-                    ,this.getClass().getName()
-                    ,"ERROR"
-                    ,message));
+            log.error(message);
             throw new AuthorGeneralException(message);
         } catch (NullPointerException ex) {
             String message =SERVER_ERROR;
-            log.error(String.format(
-                    LOG_INSERT
-                    ,username_log
-                    ,DATE_FORMAT.format(new Date())
-                    ,this.getClass().getName()
-                    ,"ERROR"
-                    ,message));
+            log.error(message);
             throw new AuthorNotFoundException(message);
         }
-        return  bookDto;
+        return  bookDtoO;
     }
 
-    public BookDto updateAuthorBookByIsbn(String author_username, long isbn, BookDto bookDto, String auth) throws AuthorGeneralException {
-        String username_log = "";
+    public BookDtoO updateAuthorBookByIsbn(String author_username, long isbn, BookDto bookDto, String auth) throws AuthorGeneralException {
+        BookDtoO bookDtoO;
         try {
             String username = jwtUtil.getUserName(auth);
-            username_log = username;
             if (username == null
                     || username.isEmpty()) {
                 String message = BAD_CREDENTIAL;
-                log.warn(String.format(
-                        LOG_INSERT
-                        , auth
-                        , DATE_FORMAT.format(new Date())
-                        , this.getClass().getName()
-                        , "WARN"
-                        , message));
+                log.debug(message);
                 throw new AuthorGeneralException(BAD_CREDENTIAL, HttpStatus.BAD_REQUEST);
             }
             if (!bookShopUserUtil.getUserByUsername(username).isEnabled()) {
                 String message = USER_DEACTIVATED;
-                log.warn(String.format(
-                        LOG_INSERT
-                        , username_log
-                        , DATE_FORMAT.format(new Date())
-                        , this.getClass().getName()
-                        , "WARN"
-                        , message));
+                log.debug(message);
                 throw new AuthorGeneralException(message, HttpStatus.BAD_REQUEST);
             }
             if (bookShopUserUtil.getUserRole(username) != RoleID.ADMIN.getRole()
                     && (bookShopUserUtil.getUserRole(username) != RoleID.AUTHOR.getRole()
                     || !bookShopUserUtil.getUserByUsername(username).getId().equals(author_username))) {
                 String message = UNAUTHORIZED_OPERATION;
-                log.warn(String.format(
-                        LOG_INSERT
-                        , username_log
-                        , DATE_FORMAT.format(new Date())
-                        , this.getClass().getName()
-                        , "WARN"
-                        , message));
+                log.debug(message);
                 throw new AuthorGeneralException(message, HttpStatus.BAD_REQUEST);
             }
             Author author = authorService.getAuthorByUsername(author_username);
             if (author == null) {
                 String message = AUTHOR_NOT_EXISTS + " \\ " + BAD_REQUEST;
-                log.warn(String.format(
-                        LOG_INSERT
-                        , username_log
-                        , DATE_FORMAT.format(new Date())
-                        , this.getClass().getName()
-                        , "WARN"
-                        , message));
+                log.debug(message);
                 throw new AuthorNotFoundException(message, HttpStatus.BAD_REQUEST);
             }
             Book book = author.getBookByIsbn(isbn);
             if (book == null) {
                 String message = BOOK_NOT_FOUND + " \\ " + BAD_REQUEST;
-                log.warn(String.format(
-                        LOG_INSERT
-                        , username_log
-                        , DATE_FORMAT.format(new Date())
-                        , this.getClass().getName()
-                        , "WARN"
-                        , message));
+                log.debug(message);
                 throw new AuthorBookNotFound(message, HttpStatus.NO_CONTENT);
             }
-            book = updateAuthorBook(author,book,convertNewForm(bookDto,Book.class),username_log);
-            bookDto = convertNewForm(book,BookDto.class);
+            book = updateAuthorBook(book,convertNewForm(bookDto,Book.class),username);
+            bookDtoO = convertNewForm(book,BookDtoO.class);
         } catch (IllegalArgumentException ex) {
             String message =AUTHOR_USERNAME_IS_NULL +" \\ "+SERVER_ERROR;
-            log.error(String.format(
-                    LOG_INSERT
-                    ,username_log
-                    ,DATE_FORMAT.format(new Date())
-                    ,this.getClass().getName()
-                    ,"ERROR"
-                    ,message));
+            log.error(message);
             throw new AuthorGeneralException(message);
         } catch (NullPointerException ex) {
             String message =SERVER_ERROR;
-            log.error(String.format(
-                    LOG_INSERT
-                    ,username_log
-                    ,DATE_FORMAT.format(new Date())
-                    ,this.getClass().getName()
-                    ,"ERROR"
-                    ,message));
+            log.error(message);
             throw new AuthorNotFoundException(message);
         }
-        return  bookDto;
+        return  bookDtoO;
     }
 
-    public BookDto updateAuthorBookById(long id, long bookId, BookDto bookDto, String auth) throws AuthorGeneralException {
-        String username_log = "";
+    public BookDtoO updateAuthorBookById(long id, long bookId, BookDto bookDto, String auth) throws AuthorGeneralException {
+        BookDtoO bookDtoO;
         try {
             String username = jwtUtil.getUserName(auth);
-            username_log = username;
             if (username == null
                     || username.isEmpty()) {
                 String message = BAD_CREDENTIAL;
-                log.warn(String.format(
-                        LOG_INSERT
-                        , auth
-                        , DATE_FORMAT.format(new Date())
-                        , this.getClass().getName()
-                        , "WARN"
-                        , message));
+                log.debug(message);
                 throw new AuthorGeneralException(BAD_CREDENTIAL, HttpStatus.BAD_REQUEST);
             }
             if (!bookShopUserUtil.getUserByUsername(username).isEnabled()) {
                 String message = USER_DEACTIVATED;
-                log.warn(String.format(
-                        LOG_INSERT
-                        , username_log
-                        , DATE_FORMAT.format(new Date())
-                        , this.getClass().getName()
-                        , "WARN"
-                        , message));
+                log.debug(message);
                 throw new AuthorGeneralException(message, HttpStatus.BAD_REQUEST);
             }
             if (bookShopUserUtil.getUserRole(username) != RoleID.ADMIN.getRole()
                     && (bookShopUserUtil.getUserRole(username) != RoleID.AUTHOR.getRole()
                     || bookShopUserUtil.getUserByUsername(username).getId() != id)) {
                 String message = UNAUTHORIZED_OPERATION;
-                log.warn(String.format(
-                        LOG_INSERT
-                        , username_log
-                        , DATE_FORMAT.format(new Date())
-                        , this.getClass().getName()
-                        , "WARN"
-                        , message));
+                log.debug(message);
                 throw new AuthorGeneralException(message, HttpStatus.BAD_REQUEST);
             }
             Author author = authorService.getAuthorById(id);
             if (author == null) {
                 String message = AUTHOR_NOT_EXISTS + " \\ " + BAD_REQUEST;
-                log.warn(String.format(
-                        LOG_INSERT
-                        , username_log
-                        , DATE_FORMAT.format(new Date())
-                        , this.getClass().getName()
-                        , "WARN"
-                        , message));
+                log.debug(message);
                 throw new AuthorNotFoundException(message, HttpStatus.BAD_REQUEST);
             }
             Book book = author.getBookById(bookId);
             if (book == null) {
                 String message = BOOK_NOT_FOUND + " \\ " + BAD_REQUEST;
-                log.warn(String.format(
-                        LOG_INSERT
-                        , username_log
-                        , DATE_FORMAT.format(new Date())
-                        , this.getClass().getName()
-                        , "WARN"
-                        , message));
+                log.debug(message);
                 throw new AuthorBookNotFound(message, HttpStatus.NO_CONTENT);
             }
-            book = updateAuthorBook(author,book,convertNewForm(bookDto,Book.class),username_log);
-            bookDto = convertNewForm(book,BookDto.class);
+            book = updateAuthorBook(book,convertNewForm(bookDto,Book.class),username);
+            bookDtoO = convertNewForm(book,BookDtoO.class);
         } catch (IllegalArgumentException ex) {
             String message =AUTHOR_ID_IS_NULL +" \\ "+SERVER_ERROR;
-            log.error(String.format(
-                    LOG_INSERT
-                    ,username_log
-                    ,DATE_FORMAT.format(new Date())
-                    ,this.getClass().getName()
-                    ,"ERROR"
-                    ,message));
+            log.error(message);
             throw new AuthorGeneralException(message);
         } catch (NullPointerException ex) {
             String message =SERVER_ERROR;
-            log.error(String.format(
-                    LOG_INSERT
-                    ,username_log
-                    ,DATE_FORMAT.format(new Date())
-                    ,this.getClass().getName()
-                    ,"ERROR"
-                    ,message));
+            log.error(message);
             throw new AuthorNotFoundException(message);
         }
-        return  bookDto;
+        return  bookDtoO;
 
     }
 
-    public BookDto updateAuthorBookById(String author_username, long bookId, BookDto bookDto, String auth) throws AuthorGeneralException {
-        String username_log = "";
+    public BookDtoO updateAuthorBookById(String author_username, long bookId, BookDto bookDto, String auth) throws AuthorGeneralException {
+        BookDtoO bookDtoO;
         try {
             String username = jwtUtil.getUserName(auth);
-            username_log = username;
             if (username == null
                     || username.isEmpty()) {
                 String message = BAD_CREDENTIAL;
-                log.warn(String.format(
-                        LOG_INSERT
-                        , auth
-                        , DATE_FORMAT.format(new Date())
-                        , this.getClass().getName()
-                        , "WARN"
-                        , message));
+                log.debug(message);
                 throw new AuthorGeneralException(BAD_CREDENTIAL, HttpStatus.BAD_REQUEST);
             }
             if (!bookShopUserUtil.getUserByUsername(username).isEnabled()) {
                 String message = USER_DEACTIVATED;
-                log.warn(String.format(
-                        LOG_INSERT
-                        , username_log
-                        , DATE_FORMAT.format(new Date())
-                        , this.getClass().getName()
-                        , "WARN"
-                        , message));
+                log.debug(message);
                 throw new AuthorGeneralException(message, HttpStatus.BAD_REQUEST);
             }
             if (bookShopUserUtil.getUserRole(username) != RoleID.ADMIN.getRole()
                     && (bookShopUserUtil.getUserRole(username) != RoleID.AUTHOR.getRole()
                     || !bookShopUserUtil.getUserByUsername(username).getId().equals(author_username))) {
                 String message = UNAUTHORIZED_OPERATION;
-                log.warn(String.format(
-                        LOG_INSERT
-                        , username_log
-                        , DATE_FORMAT.format(new Date())
-                        , this.getClass().getName()
-                        , "WARN"
-                        , message));
+                log.debug(message);
                 throw new AuthorGeneralException(message, HttpStatus.BAD_REQUEST);
             }
             Author author = authorService.getAuthorByUsername(author_username);
             if (author == null) {
                 String message = AUTHOR_NOT_EXISTS + " \\ " + BAD_REQUEST;
-                log.warn(String.format(
-                        LOG_INSERT
-                        , username_log
-                        , DATE_FORMAT.format(new Date())
-                        , this.getClass().getName()
-                        , "WARN"
-                        , message));
+                log.debug(message);
                 throw new AuthorNotFoundException(message, HttpStatus.BAD_REQUEST);
             }
             Book book = author.getBookById(bookId);
             if (book == null) {
                 String message = BOOK_NOT_FOUND + " \\ " + BAD_REQUEST;
-                log.warn(String.format(
-                        LOG_INSERT
-                        , username_log
-                        , DATE_FORMAT.format(new Date())
-                        , this.getClass().getName()
-                        , "WARN"
-                        , message));
+                log.debug(message);
                 throw new AuthorBookNotFound(message, HttpStatus.NO_CONTENT);
             }
-            book = updateAuthorBook(author,book,convertNewForm(bookDto,Book.class),username_log);
-            bookDto = convertNewForm(book,BookDto.class);
+            book = updateAuthorBook(book,convertNewForm(bookDto,Book.class),username);
+            bookDtoO = convertNewForm(book,BookDtoO.class);
         } catch (IllegalArgumentException ex) {
             String message =AUTHOR_USERNAME_IS_NULL +" \\ "+SERVER_ERROR;
-            log.error(String.format(
-                    LOG_INSERT
-                    ,username_log
-                    ,DATE_FORMAT.format(new Date())
-                    ,this.getClass().getName()
-                    ,"ERROR"
-                    ,message));
+            log.error(message);
             throw new AuthorGeneralException(message);
         } catch (NullPointerException ex) {
             String message =SERVER_ERROR;
-            log.error(String.format(
-                    LOG_INSERT
-                    ,username_log
-                    ,DATE_FORMAT.format(new Date())
-                    ,this.getClass().getName()
-                    ,"ERROR"
-                    ,message));
+            log.error(message);
             throw new AuthorNotFoundException(message);
         }
-        return  bookDto;
+        return  bookDtoO;
     }
 
-    private Book updateAuthorBook(Author author, Book book, Book updatedBook, String username_log) {
+    private Book updateAuthorBook(Book book, Book updatedBook, String username_log) {
         try {
-            if(updatedBook.getId() != Integer.MIN_VALUE
-                    && updatedBook.getId() != 0
+            if(updatedBook.getId() != 0
                     && updatedBook.getId() != book.getId()) {
                 String message = BOOK_ID_CHANGE_ERROR;
-                log.warn(String.format(
-                        LOG_INSERT
-                        ,username_log
-                        ,DATE_FORMAT.format(new Date())
-                        ,this.getClass().getName()
-                        ,"WARN"
-                        ,message));
+                log.debug(message);
                 throw new AuthorGeneralException(message,HttpStatus.BAD_REQUEST);
             }
             updatedBook.setId(book.getId());
-            if(updatedBook.getIsbn() == Integer.MIN_VALUE
-                    || updatedBook.getIsbn() == 0
+            if(updatedBook.getIsbn() == 0
                     || updatedBook.getIsbn() == book.getIsbn()) {
                 updatedBook.setIsbn(book.getIsbn());
             } else {
                 if((bookService.getBookByIsbn(updatedBook.getIsbn()) != null)) {
                     String message = BOOK_EXISTS_BAD_REQUEST +" \\ "+BAD_REQUEST;
-                    log.warn(String.format(
-                            LOG_INSERT
-                            ,username_log
-                            ,DATE_FORMAT.format(new Date())
-                            ,this.getClass().getName()
-                            ,"WARN"
-                            ,message));
+                    log.debug(message);
                     throw new BookExistsException(message,HttpStatus.CONFLICT);
                 }
             }
@@ -3006,13 +1665,7 @@ public class AuthorUtil {
                 updatedBook.setAuthor(book.getAuthor());
             } else {
                 String message = BOOK_AUTHOR_CHANGE_ERROR +" \\ "+BAD_REQUEST;
-                log.warn(String.format(
-                        LOG_INSERT
-                        ,username_log
-                        ,DATE_FORMAT.format(new Date())
-                        ,this.getClass().getName()
-                        ,"WARN"
-                        ,message));
+                log.debug(message);
                 throw new AuthorGeneralException(message,HttpStatus.BAD_REQUEST);
             }
             if(updatedBook.getCustomer() == null
@@ -3022,409 +1675,223 @@ public class AuthorUtil {
                 }
             } else {
                 String message = BOOK_CUSTOMER_CHANGE_ERROR +" \\ "+BAD_REQUEST;
-                log.warn(String.format(
-                        LOG_INSERT
-                        ,username_log
-                        ,DATE_FORMAT.format(new Date())
-                        ,this.getClass().getName()
-                        ,"WARN"
-                        ,message));
+                log.debug(message);
                 throw new AuthorGeneralException(message,HttpStatus.BAD_REQUEST);
             }
             bookService.updateBook(updatedBook);
+            String message = "user ("+username_log+") update book("+book.getIsbn() + " : "+book.getName()+")";
+            log.info(message);
         } catch (IllegalArgumentException ex) {
             String message = BOOK_NULL+" \\ "+SERVER_ERROR;
-            log.error(String.format(
-                    LOG_INSERT
-                    ,username_log
-                    ,DATE_FORMAT.format(new Date())
-                    ,this.getClass().getName()
-                    ,"ERROR"
-                    ,message));
+            log.error(message);
             throw new AuthorGeneralException(message);
         } catch (NullPointerException
                  | TransactionSystemException ex) {
             String message = AUTHOR_BOOK_NULL+" \\ "+SERVER_ERROR;
-            log.error(String.format(
-                    LOG_INSERT
-                    ,username_log
-                    ,DATE_FORMAT.format(new Date())
-                    ,this.getClass().getName()
-                    ,"ERROR"
-                    ,message));
+            log.error(message);
             throw new AuthorBookNotFound(message,HttpStatus.INTERNAL_SERVER_ERROR);
         } catch (EntityExistsException
                  | DataIntegrityViolationException ex) {
             String message = "JPA: " + BOOK_EXISTS+" \\ "+SERVER_ERROR;
-            log.error(String.format(
-                    LOG_INSERT
-                    ,username_log
-                    ,DATE_FORMAT.format(new Date())
-                    ,this.getClass().getName()
-                    ,"ERROR"
-                    ,message));
+            log.error(message);
             throw new AuthorGeneralException(message,HttpStatus.INTERNAL_SERVER_ERROR);
         }
         return updatedBook;
     }
 
-    public List<BookDto> getAuthorBooksByName(long id, String name, String auth) throws AuthorGeneralException {
-        List<BookDto> bookDtoList;
-        String username_log = "";
+    public List<BookDtoO> getAuthorBooksByName(long id, String name, String auth) throws AuthorGeneralException {
+        List<BookDtoO> bookDtoList;
         try {
             String username = jwtUtil.getUserName(auth);
-            username_log = username;
             if(username == null
                     || username.isEmpty()) {
                 String message =BAD_CREDENTIAL;
-                log.warn(String.format(
-                        LOG_INSERT
-                        ,auth
-                        ,DATE_FORMAT.format(new Date())
-                        ,this.getClass().getName()
-                        ,"WARN"
-                        ,message));
+                log.debug(message);
                 throw new AuthorGeneralException(BAD_CREDENTIAL,HttpStatus.BAD_REQUEST);
             }
             if(!bookShopUserUtil.getUserByUsername(username).isEnabled()) {
                 String message =USER_DEACTIVATED;
-                log.warn(String.format(
-                        LOG_INSERT
-                        ,username_log
-                        ,DATE_FORMAT.format(new Date())
-                        ,this.getClass().getName()
-                        ,"WARN"
-                        ,message));
+                log.debug(message);
                 throw new AuthorGeneralException(message,HttpStatus.BAD_REQUEST);
             }
             Author author = authorService.getAuthorById(id);
             if(author == null){
                 String message =AUTHOR_NOT_EXISTS +" \\ "+BAD_REQUEST;
-                log.warn(String.format(
-                        LOG_INSERT
-                        ,username_log
-                        ,DATE_FORMAT.format(new Date())
-                        ,this.getClass().getName()
-                        ,"WARN"
-                        ,message));
+                log.debug(message);
                 throw new AuthorNotFoundException(message,HttpStatus.BAD_REQUEST);
             }
             List<Book> books =  author.getBooks(book -> book.getName().equals(name));
             if(books.isEmpty()){
                 String message =BOOK_NOT_FOUND +" \\ "+BAD_REQUEST;
-                log.warn(String.format(
-                        LOG_INSERT
-                        ,username_log
-                        ,DATE_FORMAT.format(new Date())
-                        ,this.getClass().getName()
-                        ,"WARN"
-                        ,message));
+                log.debug(message);
                 throw new AuthorBookNotFound(message,HttpStatus.NO_CONTENT);
             }
-            bookDtoList = mapListForm(books,BookDto.class);
+            bookDtoList = mapListForm(books,BookDtoO.class);
             String books_author = "";
             for (Book book : books) {
                 books_author += book.getName() + " : " + book.getIsbn() + " / ";
             }
-            String message ="user ("+username_log+") get author ("+author.getUsername()+") books ("+books_author+")";
-            log.info(String.format(
-                    LOG_INSERT
-                    ,username_log
-                    ,DATE_FORMAT.format(new Date())
-                    ,this.getClass().getName()
-                    ,"INFO"
-                    ,message));
+            String message ="user ("+username+") get author ("+author.getUsername()+") books ("+books_author+")";
+            log.info(message);
         } catch (IllegalArgumentException ex) {
             String message = AUTHOR_ID_IS_NULL +" \\ "+SERVER_ERROR;
-            log.error(String.format(
-                    LOG_INSERT
-                    ,username_log
-                    ,DATE_FORMAT.format(new Date())
-                    ,this.getClass().getName()
-                    ,"ERROR"
-                    ,message));
+            log.error(message);
             throw new AuthorGeneralException(message);
         }  catch (NullPointerException
                  |  IllegalStateException ex) {
             String message =SERVER_ERROR;
-            log.error(String.format(
-                    LOG_INSERT
-                    ,username_log
-                    ,DATE_FORMAT.format(new Date())
-                    ,this.getClass().getName()
-                    ,"ERROR"
-                    ,message));
+            log.error(message);
             throw new AuthorGeneralException(message);
         } catch (UnsupportedOperationException
                 | ClassCastException ex) {
             String message =BOOK_LIST_PROBLEM + " \\ " + SERVER_ERROR;
-            log.error(String.format(
-                    LOG_INSERT
-                    ,username_log
-                    ,DATE_FORMAT.format(new Date())
-                    ,this.getClass().getName()
-                    ,"ERROR"
-                    ,message));
+            log.error(message);
             throw new AuthorGeneralException(message);
         }
         return bookDtoList;
     }
 
-    public List<BookDto> getAuthorBooksByName(String author_username, String name, String auth) throws AuthorGeneralException {
-        List<BookDto> bookDtoList;
-        String username_log = "";
+    public List<BookDtoO> getAuthorBooksByName(String author_username, String name, String auth) throws AuthorGeneralException {
+        List<BookDtoO> bookDtoList;
         try {
             String username = jwtUtil.getUserName(auth);
-            username_log = username;
             if(username == null
                     || username.isEmpty()) {
                 String message =BAD_CREDENTIAL;
-                log.warn(String.format(
-                        LOG_INSERT
-                        ,auth
-                        ,DATE_FORMAT.format(new Date())
-                        ,this.getClass().getName()
-                        ,"WARN"
-                        ,message));
+                log.debug(message);
                 throw new AuthorGeneralException(BAD_CREDENTIAL,HttpStatus.BAD_REQUEST);
             }
             if(!bookShopUserUtil.getUserByUsername(username).isEnabled()) {
                 String message =USER_DEACTIVATED;
-                log.warn(String.format(
-                        LOG_INSERT
-                        ,username_log
-                        ,DATE_FORMAT.format(new Date())
-                        ,this.getClass().getName()
-                        ,"WARN"
-                        ,message));
+                log.debug(message);
                 throw new AuthorGeneralException(message,HttpStatus.BAD_REQUEST);
             }
             Author author = authorService.getAuthorByUsername(author_username);
             if(author == null){
                 String message =AUTHOR_NOT_EXISTS +" \\ "+BAD_REQUEST;
-                log.warn(String.format(
-                        LOG_INSERT
-                        ,username_log
-                        ,DATE_FORMAT.format(new Date())
-                        ,this.getClass().getName()
-                        ,"WARN"
-                        ,message));
+                log.debug(message);
                 throw new AuthorNotFoundException(message,HttpStatus.BAD_REQUEST);
             }
             List<Book> books =  author.getBooks(book -> book.getName().equals(name));
             if(books.isEmpty()){
                 String message =BOOK_NOT_FOUND +" \\ "+BAD_REQUEST;
-                log.warn(String.format(
-                        LOG_INSERT
-                        ,username_log
-                        ,DATE_FORMAT.format(new Date())
-                        ,this.getClass().getName()
-                        ,"WARN"
-                        ,message));
+                log.debug(message);
                 throw new AuthorBookNotFound(message,HttpStatus.NO_CONTENT);
             }
-            bookDtoList = mapListForm(books,BookDto.class);
+            bookDtoList = mapListForm(books,BookDtoO.class);
             String books_author = "";
             for (Book book : books) {
                 books_author += book.getName() + " : " + book.getIsbn() + " / ";
             }
-            String message ="user ("+username_log+") get author ("+author.getUsername()+") books ("+books_author+")";
-            log.info(String.format(
-                    LOG_INSERT
-                    ,username_log
-                    ,DATE_FORMAT.format(new Date())
-                    ,this.getClass().getName()
-                    ,"INFO"
-                    ,message));
+            String message ="user ("+username+") get author ("+author.getUsername()+") books ("+books_author+")";
+            log.info(message);
         } catch (IllegalArgumentException ex) {
             String message = AUTHOR_USERNAME_IS_NULL +" \\ "+SERVER_ERROR;
-            log.error(String.format(
-                    LOG_INSERT
-                    ,username_log
-                    ,DATE_FORMAT.format(new Date())
-                    ,this.getClass().getName()
-                    ,"ERROR"
-                    ,message));
+            log.error(message);
             throw new AuthorGeneralException(message);
         }  catch (NullPointerException
                   |  IllegalStateException ex) {
             String message =SERVER_ERROR;
-            log.error(String.format(
-                    LOG_INSERT
-                    ,username_log
-                    ,DATE_FORMAT.format(new Date())
-                    ,this.getClass().getName()
-                    ,"ERROR"
-                    ,message));
+            log.error(message);
             throw new AuthorGeneralException(message);
         } catch (UnsupportedOperationException
                  | ClassCastException ex) {
             String message =BOOK_LIST_PROBLEM + " \\ " + SERVER_ERROR;
-            log.error(String.format(
-                    LOG_INSERT
-                    ,username_log
-                    ,DATE_FORMAT.format(new Date())
-                    ,this.getClass().getName()
-                    ,"ERROR"
-                    ,message));
+            log.error(message);
             throw new AuthorGeneralException(message);
         }
         return bookDtoList;
     }
 
-    public List<BookDto> getAuthorBooks(long id, String auth) throws AuthorGeneralException {
-        List<BookDto> bookDtoList;
-        String username_log = "";
+    public List<BookDtoO> getAuthorBooks(long id, String auth) throws AuthorGeneralException {
+        List<BookDtoO> bookDtoList;
         try {
             String username = jwtUtil.getUserName(auth);
-            username_log = username;
             if(username == null
                     || username.isEmpty()) {
                 String message =BAD_CREDENTIAL;
-                log.warn(String.format(
-                        LOG_INSERT
-                        ,auth
-                        ,DATE_FORMAT.format(new Date())
-                        ,this.getClass().getName()
-                        ,"WARN"
-                        ,message));
+                log.debug(message);
                 throw new AuthorGeneralException(BAD_CREDENTIAL,HttpStatus.BAD_REQUEST);
             }
             if(!bookShopUserUtil.getUserByUsername(username).isEnabled()) {
                 String message =USER_DEACTIVATED;
-                log.warn(String.format(
-                        LOG_INSERT
-                        ,username_log
-                        ,DATE_FORMAT.format(new Date())
-                        ,this.getClass().getName()
-                        ,"WARN"
-                        ,message));
+                log.debug(message);
                 throw new AuthorGeneralException(message,HttpStatus.BAD_REQUEST);
             }
             Author author = authorService.getAuthorById(id);
             if(author == null){
                 String message =AUTHOR_NOT_EXISTS +" \\ "+BAD_REQUEST;
-                log.warn(String.format(
-                        LOG_INSERT
-                        ,username_log
-                        ,DATE_FORMAT.format(new Date())
-                        ,this.getClass().getName()
-                        ,"WARN"
-                        ,message));
+                log.debug(message);
                 throw new AuthorNotFoundException(message,HttpStatus.BAD_REQUEST);
             }
             List<Book> books = author.getBooks();
             if(books.isEmpty()){
                 String message =BOOK_NOT_FOUND +" \\ "+BAD_REQUEST;
-                log.warn(String.format(
-                        LOG_INSERT
-                        ,username_log
-                        ,DATE_FORMAT.format(new Date())
-                        ,this.getClass().getName()
-                        ,"WARN"
-                        ,message));
+                log.debug(message);
                 throw new AuthorBookNotFound(message,HttpStatus.NO_CONTENT);
             }
-            bookDtoList = mapListForm(books,BookDto.class);
+            bookDtoList = mapListForm(books,BookDtoO.class);
+            String books_author = "";
+            for (Book book : books) {
+                books_author += book.getName() + " : " + book.getIsbn() + " / ";
+            }
+            String message ="user ("+username+") get author ("+author.getUsername()+") books ("+books_author+")";
+            log.info(message);
         } catch (IllegalArgumentException ex) {
             String message = AUTHOR_ID_IS_NULL +" \\ "+SERVER_ERROR;
-            log.error(String.format(
-                    LOG_INSERT
-                    ,username_log
-                    ,DATE_FORMAT.format(new Date())
-                    ,this.getClass().getName()
-                    ,"ERROR"
-                    ,message));
+            log.error(message);
             throw new AuthorGeneralException(message);
         }  catch (NullPointerException
                   |  IllegalStateException ex) {
             String message =SERVER_ERROR;
-            log.error(String.format(
-                    LOG_INSERT
-                    ,username_log
-                    ,DATE_FORMAT.format(new Date())
-                    ,this.getClass().getName()
-                    ,"ERROR"
-                    ,message));
+            log.error(message);
             throw new AuthorGeneralException(message);
         }
         return bookDtoList;
     }
 
-    public List<BookDto> getAuthorBooks(String author_username, String auth) throws AuthorGeneralException {
-        List<BookDto> bookDtoList;
-        String username_log = "";
+    public List<BookDtoO> getAuthorBooks(String author_username, String auth) throws AuthorGeneralException {
+        List<BookDtoO> bookDtoList;
         try {
             String username = jwtUtil.getUserName(auth);
-            username_log = username;
             if(username == null
                     || username.isEmpty()) {
                 String message =BAD_CREDENTIAL;
-                log.warn(String.format(
-                        LOG_INSERT
-                        ,auth
-                        ,DATE_FORMAT.format(new Date())
-                        ,this.getClass().getName()
-                        ,"WARN"
-                        ,message));
+                log.debug(message);
                 throw new AuthorGeneralException(BAD_CREDENTIAL,HttpStatus.BAD_REQUEST);
             }
             if(!bookShopUserUtil.getUserByUsername(username).isEnabled()) {
                 String message =USER_DEACTIVATED;
-                log.warn(String.format(
-                        LOG_INSERT
-                        ,username_log
-                        ,DATE_FORMAT.format(new Date())
-                        ,this.getClass().getName()
-                        ,"WARN"
-                        ,message));
+                log.debug(message);
                 throw new AuthorGeneralException(message,HttpStatus.BAD_REQUEST);
             }
             Author author = authorService.getAuthorByUsername(author_username);
             if(author == null){
                 String message =AUTHOR_NOT_EXISTS +" \\ "+BAD_REQUEST;
-                log.warn(String.format(
-                        LOG_INSERT
-                        ,username_log
-                        ,DATE_FORMAT.format(new Date())
-                        ,this.getClass().getName()
-                        ,"WARN"
-                        ,message));
+                log.debug(message);
                 throw new AuthorNotFoundException(message,HttpStatus.BAD_REQUEST);
             }
             List<Book> books = author.getBooks();
             if(books.isEmpty()){
                 String message =BOOK_NOT_FOUND +" \\ "+BAD_REQUEST;
-                log.warn(String.format(
-                        LOG_INSERT
-                        ,username_log
-                        ,DATE_FORMAT.format(new Date())
-                        ,this.getClass().getName()
-                        ,"WARN"
-                        ,message));
+                log.debug(message);
                 throw new AuthorBookNotFound(message,HttpStatus.NO_CONTENT);
             }
-            bookDtoList = mapListForm(books,BookDto.class);
+            bookDtoList = mapListForm(books,BookDtoO.class);
+            String books_author = "";
+            for (Book book : books) {
+                books_author += book.getName() + " : " + book.getIsbn() + " / ";
+            }
+            String message ="user ("+username+") get author ("+author.getUsername()+") books ("+books_author+")";
+            log.info(message);
         } catch (IllegalArgumentException ex) {
             String message = AUTHOR_USERNAME_IS_NULL +" \\ "+SERVER_ERROR;
-            log.error(String.format(
-                    LOG_INSERT
-                    ,username_log
-                    ,DATE_FORMAT.format(new Date())
-                    ,this.getClass().getName()
-                    ,"ERROR"
-                    ,message));
+            log.error(message);
             throw new AuthorGeneralException(message);
         }  catch (NullPointerException
                   |  IllegalStateException ex) {
             String message =SERVER_ERROR;
-            log.error(String.format(
-                    LOG_INSERT
-                    ,username_log
-                    ,DATE_FORMAT.format(new Date())
-                    ,this.getClass().getName()
-                    ,"ERROR"
-                    ,message));
+            log.error(message);
             throw new AuthorGeneralException(message);
         }
         return bookDtoList;

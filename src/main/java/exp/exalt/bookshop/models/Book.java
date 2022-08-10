@@ -25,10 +25,10 @@ public class Book implements Serializable {
     private String name;
     @NotNull
     @JsonBackReference("author-book")
-    @ManyToOne(cascade = { })
+    @ManyToOne(cascade = {CascadeType.REMOVE})
     private Author author;
     @JsonBackReference("customer-book")
-    @ManyToOne(cascade = {CascadeType.MERGE,CascadeType.PERSIST,CascadeType.REMOVE})
+    @ManyToOne
     private Customer customer;
     @Id
     @GeneratedValue(strategy= GenerationType.AUTO)

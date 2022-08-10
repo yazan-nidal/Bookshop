@@ -2,8 +2,8 @@ package exp.exalt.bookshop.dto.book_dto;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonInclude;
-import exp.exalt.bookshop.dto.author_dto.AuthorDto;
-import exp.exalt.bookshop.dto.customer_dto.CustomerDto;
+import exp.exalt.bookshop.dto.author_dto.AuthorDtoO;
+import exp.exalt.bookshop.dto.customer_dto.CustomerDtoO;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -16,7 +16,7 @@ import java.io.Serializable;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-public class BookDto implements Serializable {
+public class BookDtoO implements Serializable {
     @JsonInclude(JsonInclude.Include.CUSTOM)
     @Nullable
     private long isbn = 0;
@@ -26,11 +26,11 @@ public class BookDto implements Serializable {
     @JsonInclude(JsonInclude.Include.CUSTOM)
     @Nullable
     @JsonBackReference("author-book")
-    private AuthorDto author;
+    private AuthorDtoO author;
     @JsonInclude(JsonInclude.Include.CUSTOM)
     @Nullable
     @JsonBackReference("customer-book")
-    private CustomerDto customer;
+    private CustomerDtoO customer;
     @Nullable
     @JsonInclude(JsonInclude.Include.CUSTOM)
     private long id = 0;
