@@ -37,4 +37,7 @@ public class CustomerDto implements Serializable {
     @JsonInclude(JsonInclude.Include.CUSTOM)
     @Column(nullable = true)
     private int role = Integer.MIN_VALUE;
+    @JsonInclude(JsonInclude.Include.CUSTOM)
+    @Column(nullable = true)
+    private boolean enabled = true;
 }
