@@ -5,6 +5,7 @@ import exp.exalt.bookshop.models.AuthenticationResponse;
 import exp.exalt.bookshop.services.MyUserDetailsService;
 import exp.exalt.bookshop.util.JwtUtil;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -40,5 +41,11 @@ public class AuthenticationController {
         final String jwt = jwtTokenUtil.generateToken(userDetails);
         return new ResponseEntity<>(new AuthenticationResponse(jwt), HttpStatus.ACCEPTED);
     }
+
+    @PostMapping(value = {"","/"})
+    public ResponseEntity<Object> checkAuthentication(@RequestHeader(HttpHeaders.AUTHORIZATION) String auth) throws BadCredentialsException {
+        return new ResponseEntity<>(HttpStatus.OK);
+    }
+
 
 }

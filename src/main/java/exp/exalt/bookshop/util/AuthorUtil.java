@@ -418,7 +418,7 @@ public class AuthorUtil {
                 log.debug(message);
                 throw new AuthorNotFoundException();
             }
-            this.deleteAuthorBooks(author,username);
+            this.deleteAuthorBooks(author,AUTHOR_DEL_MODE,username);
             authorService.deleteAuthor(id);
             String message ="user ("+username+") deleted this author ("+author.getUsername()+") and wrote it";
             log.info(message);
@@ -464,7 +464,7 @@ public class AuthorUtil {
                 log.debug(message);
                 throw new AuthorNotFoundException();
             }
-            this.deleteAuthorBooks(author,username);
+            this.deleteAuthorBooks(author,AUTHOR_DEL_MODE,username);
             authorService.deleteAuthor(author_username);
             String message ="user ("+username+") deleted this author ("+author.getUsername()+") and wrote it";
             log.info(message);
@@ -961,7 +961,7 @@ public class AuthorUtil {
                 log.debug(message);
                 throw new AuthorNotFoundException(message,HttpStatus.BAD_REQUEST);
             }
-            bookDtoList = mapListForm(deleteAuthorBooks(author,username), BookDtoO.class);
+            bookDtoList = mapListForm(deleteAuthorBooks(author,BOOK_DEL_MODE,username), BookDtoO.class);
         } catch (IllegalArgumentException ex) {
             String message = AUTHOR_ID_IS_NULL +" \\ "+SERVER_ERROR;
             log.error(message);
@@ -1003,7 +1003,7 @@ public class AuthorUtil {
                 log.debug(message);
                 throw new AuthorNotFoundException(message,HttpStatus.BAD_REQUEST);
             }
-            bookDtoList = mapListForm(deleteAuthorBooks(author,username), BookDtoO.class);
+            bookDtoList = mapListForm(deleteAuthorBooks(author,BOOK_DEL_MODE,username), BookDtoO.class);
         } catch (IllegalArgumentException ex) {
             String message = AUTHOR_USERNAME_IS_NULL +" \\ "+SERVER_ERROR;
             log.error(message);
@@ -1016,12 +1016,15 @@ public class AuthorUtil {
         return bookDtoList;
     }
 
-    private List<BookDto> deleteAuthorBooks(Author author,String username) {
+    private List<BookDto> deleteAuthorBooks(Author author, String mode, String username) {
         List<BookDto> bookDtoList;
         try {
             List<Book> books = new ArrayList<>(author.getBooks());
             if(books.isEmpty())
             {
+                if(mode.equals(AUTHOR_DEL_MODE)){
+                    return null;
+                }
                 String message = AUTHOR_EMPTY_BOOK_LIST+" \\ "+BAD_REQUEST;
                 log.debug(message);
                 throw new AuthorBookNotFound(message,HttpStatus.INTERNAL_SERVER_ERROR);

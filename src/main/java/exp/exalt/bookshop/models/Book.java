@@ -25,7 +25,7 @@ public class Book implements Serializable {
     private String name;
     @NotNull
     @JsonBackReference("author-book")
-    @ManyToOne(cascade = {CascadeType.REMOVE})
+    @ManyToOne
     private Author author;
     @JsonBackReference("customer-book")
     @ManyToOne

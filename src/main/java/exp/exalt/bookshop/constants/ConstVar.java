@@ -68,6 +68,8 @@ public class ConstVar {
     public static final String PASSWORD_LENGTH_Problem = "please set password with "+PASSWORD_LENGTH+ " character at least";
     public static final String USERNAME_LENGTH_Problem = "please set password with "+USERNAME_LENGTH+ " character at least";
 
+    public static final String AUTHOR_DEL_MODE = "AUTHOR_DEL_MODE_0X";
+    public static final String BOOK_DEL_MODE = "BOOK_DEL_MODE_0X";
 
     private ConstVar(){
 
