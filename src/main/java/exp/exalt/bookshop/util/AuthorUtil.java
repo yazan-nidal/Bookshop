@@ -254,7 +254,7 @@ public class AuthorUtil {
             if(author.getUsername() == null
                     || author.getUsername().isEmpty()
                     || author.getUsername().length() < USERNAME_LENGTH) {
-                String message =USERNAME_LENGTH_Problem;
+                String message = USERNAME_LENGTH_PROBLEM;
                 log.debug(message);
                 throw new AuthorGeneralException(message, HttpStatus.BAD_REQUEST);
             }
@@ -266,7 +266,7 @@ public class AuthorUtil {
             if(author.getPassword() == null
                     || author.getPassword().isEmpty()
                     || author.getPassword().length() < PASSWORD_LENGTH) {
-                    String message = PASSWORD_LENGTH_Problem + " \\ " + BAD_REQUEST;
+                    String message = PASSWORD_LENGTH_PROBLEM + " \\ " + BAD_REQUEST;
                 log.debug(message);
                 throw new AuthorGeneralException(message,HttpStatus.BAD_REQUEST);
             }
@@ -1112,7 +1112,7 @@ public class AuthorUtil {
                 authorI.setPassword(author.getPassword());
             } else {
                 if(authorI.getPassword().length() < PASSWORD_LENGTH) {
-                    String message = PASSWORD_LENGTH_Problem + " \\ " + BAD_REQUEST;
+                    String message = PASSWORD_LENGTH_PROBLEM + " \\ " + BAD_REQUEST;
                     log.debug(message);
                     throw new AuthorGeneralException(message,HttpStatus.BAD_REQUEST);
                 }
@@ -1208,7 +1208,7 @@ public class AuthorUtil {
                 authorI.setPassword(author.getPassword());
             } else {
                 if(authorI.getPassword().length() < PASSWORD_LENGTH) {
-                    String message = PASSWORD_LENGTH_Problem + " \\ " + BAD_REQUEST;
+                    String message = PASSWORD_LENGTH_PROBLEM + " \\ " + BAD_REQUEST;
                     log.debug(message);
                     throw new AuthorGeneralException(message,HttpStatus.BAD_REQUEST);
                 }

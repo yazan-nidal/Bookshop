@@ -4,6 +4,12 @@ import org.springframework.http.HttpStatus;
 
 public class AuthorBookNotFound extends RuntimeException{
     private static final long serialVersionUID = 11L;
+
+    @Override
+    public String getMessage() {
+        return message;
+    }
+
     private final String message;
     private HttpStatus httpStatus;
 

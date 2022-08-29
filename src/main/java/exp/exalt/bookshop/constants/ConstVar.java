@@ -1,26 +1,9 @@
 package exp.exalt.bookshop.constants;
 
-import org.springframework.security.core.parameters.P;
-
 import java.text.SimpleDateFormat;
 
 public class ConstVar {
     public static final String CONTACT_ADMIN= " plz contact admin.";
-
-    public static final String AUTHOR_CONFLICT = "Author (ID) is used please use another";
-
-    public static final String AUTHOR_ROLE_CHANGE_CONFLICT  = "cant change author role to other, out this roles {admin,author}";
-
-
-    public static final String OR =  " | ";
-
-
-    public static final String BOOK_CONFLICT = "Book (ISBN) is used please use another";
-
-
-
-    public static final String ID_IS_NULL = "ID is null";
-
     public static final String NAME_IS_NULL = "Name is null";
     public static final String FOR_EACH_ACTION = " the specified action is null ";
 
@@ -65,8 +48,8 @@ public class ConstVar {
 
     public static final int PASSWORD_LENGTH = 5;
     public static final int USERNAME_LENGTH = 3;
-    public static final String PASSWORD_LENGTH_Problem = "please set password with "+PASSWORD_LENGTH+ " character at least";
-    public static final String USERNAME_LENGTH_Problem = "please set password with "+USERNAME_LENGTH+ " character at least";
+    public static final String PASSWORD_LENGTH_PROBLEM = "please set password with "+PASSWORD_LENGTH+ " character at least";
+    public static final String USERNAME_LENGTH_PROBLEM = "please set password with "+USERNAME_LENGTH+ " character at least";
 
     public static final String AUTHOR_DEL_MODE = "AUTHOR_DEL_MODE_0X";
     public static final String BOOK_DEL_MODE = "BOOK_DEL_MODE_0X";
