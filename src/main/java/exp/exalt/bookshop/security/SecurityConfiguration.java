@@ -31,9 +31,19 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
     @Value("${spring.websecurity.debug:false}")
     boolean webSecurityDebug;
 
+    private static final String[] AUTH_WHITELIST = {
+            "/swagger-resources/**",
+            "/swagger-ui.html",
+            "/swagger-ui*",
+            "/swagger-ui/*",
+            "/v2/api-docs",
+            "/webjars/**"
+    };
+
     @Override
     public void configure(WebSecurity web) throws Exception {
         web.debug(webSecurityDebug);
+        web.ignoring().antMatchers(AUTH_WHITELIST);
     }
 
     @Bean
